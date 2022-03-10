@@ -7,11 +7,11 @@
     "main": "./dist/escodegen.cjs",
     "exports": {
         "node": {
-            "import": "./src/escodgen-node.js",
+            "import": "./dist/escodgen-node.esm.js",
             "require": "./dist/escodegen.cjs"
         },
-        "browser-import": "./dist/escodgen.esm.js",
-        "browser": "./dist/escodegen.umd.js"
+        "browser-import": "./dist/escodgen-browser.esm.js",
+        "browser": "./dist/escodegen-browser.umd.js"
     },
     "bin": {
         "esgenerate": "./bin/esgenerate.js",

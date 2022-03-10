@@ -11,10 +11,18 @@ export default [{
     },
     plugins: [commonjs(), resolve(), terser()]
 }, {
+    input: 'src/escodegen-node.js',
+    output: {
+        file: 'dist/escodegen-node.esm.js',
+        format: 'esm',
+        sourcemap: true
+    },
+    plugins: [commonjs(), resolve(), terser()]
+}, {
     input: 'src/escodegen-browser.js',
     output: {
         name: 'escodegen',
-        file: 'dist/escodegen.umd.js',
+        file: 'dist/escodegen-browser.umd.js',
         format: 'umd',
         sourcemap: true
     },
@@ -22,7 +30,7 @@ export default [{
 }, {
     input: 'src/escodegen-browser.js',
     output: {
-        file: 'dist/escodegen.esm.js',
+        file: 'dist/escodegen-browser.esm.js',
         format: 'esm',
         sourcemap: true
     },
