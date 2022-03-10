@@ -41,9 +41,9 @@ function make_eval(code) {
 }
 
 function runTest(expected, result, verbatim) {
-    let actual, options;
+    let actual;
 
-    options = {
+    const options = {
         indent: '    ',
         directive: true,
         parse: esprima.parse,

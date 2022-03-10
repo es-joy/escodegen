@@ -24,7 +24,6 @@
 */
 
 import fs from 'fs';
-import path from 'path';
 import esprima from 'esprima';
 import Optionator from 'optionator';
 import * as escodegen from '../src/escodegen-node.js';

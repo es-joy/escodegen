@@ -36,41 +36,37 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 chai.use(chaiExclude);
 
 function test(code, expected) {
-    let tree, actual, actualTree, options;
-
-    options = {
+    const options = {
         ranges: false,
         locations: false,
         ecmaVersion: 12
     };
 
-    tree = acorn.parse(code, options);
+    const tree = acorn.parse(code, options);
 
     // for UNIX text comment
-    actual = escodegen.generate(tree);
-    actualTree = acorn.parse(actual, options);
+    const actual = escodegen.generate(tree);
+    const actualTree = acorn.parse(actual, options);
 
     expect(actual).to.be.equal(expected);
     expect(tree).excludingEvery(['start', 'end', 'raw']).to.deep.equal(actualTree);
 }
 
 function testMin(code, expected) {
-    let tree, actual, actualTree, options;
-
-    options = {
+    const options = {
         ranges: false,
         locations: false,
         ecmaVersion: 12
     };
 
-    tree = acorn.parse(code, options);
+    const tree = acorn.parse(code, options);
 
     // for UNIX text comment
-    actual = `${escodegen.generate(tree, {
+    const actual = `${escodegen.generate(tree, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
     }).replace(/[\n\r]$/, '')  }\n`;
-    actualTree = acorn.parse(actual, options);
+    const actualTree = acorn.parse(actual, options);
 
     expect(actual).to.be.equal(expected);
     expect(tree).excludingEvery(['start', 'end', 'raw']).to.deep.equal(actualTree);

@@ -164,14 +164,12 @@ const data = {
 };
 
 function runTest(ast, expected) {
-    let actual, options;
-
-    options = {
+    const options = {
         indent: '    ',
         parse: esprima.parse
     };
 
-    actual = escodegen.generate(ast, options);
+    const actual = escodegen.generate(ast, options);
     expect(actual).to.be.equal(expected);
 }
 

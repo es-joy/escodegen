@@ -25,10 +25,6 @@
 // import esprima from './3rdparty/esprima-1.0.0-dev.js';
 import escodegen from './loader.js';
 
-function slug(name) {
-    return name.toLowerCase().replace(/\s/g, '-');
-}
-
 function adjustRegexLiteral(key, value) {
     if (key === 'value' && value instanceof RegExp) {
         value = value.toString();
@@ -189,14 +185,14 @@ const fixtures = {
 };
 
 function testAPI(code, result) {
-    let expected, res, actual;
-    expected = JSON.stringify(result.result, null, 4);
+    let res;
+    const expected = JSON.stringify(result.result, null, 4);
     if (typeof result.property !== 'undefined') {
         res = escodegen[result.property];
     } else {
         res = escodegen[result.call].apply(escodegen, result.args);
     }
-    actual = JSON.stringify(res, adjustRegexLiteral, 4);
+    const actual = JSON.stringify(res, adjustRegexLiteral, 4);
     expect(actual).to.be.equal(expected);
 }
 

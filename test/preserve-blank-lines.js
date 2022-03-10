@@ -32,12 +32,9 @@ import escodegen from './loader.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function test(code, expected) {
-    let tree, actual, options, StringObject;
+    let tree;
 
-    // alias, so that JSLint does not complain.
-    StringObject = String;
-
-    options = {
+    let options = {
         range: true,
         tokens: true,
         comment: true
@@ -55,7 +52,7 @@ function test(code, expected) {
     };
 
     // for UNIX text comment
-    actual = escodegen.generate(tree, options);
+    const actual = escodegen.generate(tree, options);
     expect(actual).to.be.equal(expected);
 }
 

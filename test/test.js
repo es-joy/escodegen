@@ -14906,12 +14906,9 @@ function adjustRegexLiteral(key, value) {
 }
 
 function testIdentity(code, syntax) {
-    let expected, tree, actual, actual2, options, StringObject;
+    let expected, tree, actual, actual2;
 
-    // alias, so that JSLint does not complain.
-    StringObject = String;
-
-    options = {
+    const options = {
         comment: false,
         range: false,
         loc: false,
@@ -14932,9 +14929,9 @@ function testIdentity(code, syntax) {
 }
 
 function testGenerate(expected, result) {
-    let actual, options;
+    let actual;
 
-    options = {
+    const options = {
         indent: '    ',
         parse: esprima.parse
     };
@@ -14945,13 +14942,8 @@ function testGenerate(expected, result) {
     expect(actual).to.be.equal(expected);
 }
 
-function isGeneratorIdentityFixture(result) {
-    return !result.hasOwnProperty('generateFrom') &&
-        !result.hasOwnProperty('result');
-}
-
 function runTest(code, result) {
-    if (result.hasOwnProperty('generateFrom')) {
+    if (Object.prototype.hasOwnProperty.call(result, 'generateFrom')) {
         testGenerate(code, result);
     } else {
         testIdentity(code, result);

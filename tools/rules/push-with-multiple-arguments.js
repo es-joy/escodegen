@@ -27,11 +27,10 @@
 module.exports = function (context) {
     const MESSAGE = '"push" with multiple arguments hurts performance since optimizing compiler would not support it';
     function checkPush(node) {
-        let member;
         if (node.callee.type !== 'MemberExpression') {
             return;
         }
-        member = node.callee;
+        const member = node.callee;
         if (member.computed) {
             return;
         }

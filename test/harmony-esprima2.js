@@ -129,7 +129,7 @@ function updateDeeply(target, override) {
     }
 
     for (key in override) {
-        if (override.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(override, key)) {
             val = override[key];
             if (isHashObject(val)) {
                 if (isHashObject(target[key])) {
@@ -158,12 +158,8 @@ function adjustRegexLiteral(key, value) {
 
 function testIdentity(code, syntax) {
     'use strict';
-    let expected, tree, actual, actual2, options, StringObject;
 
-    // alias, so that JSLint does not complain.
-    StringObject = String;
-
-    options = {
+    const options = {
         comment: false,
         range: false,
         loc: false,
@@ -171,21 +167,19 @@ function testIdentity(code, syntax) {
         raw: false
     };
 
-    tree = esprima.parse(code, options);
-    expected = JSON.stringify(tree, adjustRegexLiteral, 4);
+    let tree = esprima.parse(code, options);
+    const expected = JSON.stringify(tree, adjustRegexLiteral, 4);
     tree = esprima.parse(escodegen.generate(tree), options);
-    actual = JSON.stringify(tree, adjustRegexLiteral, 4);
+    const actual = JSON.stringify(tree, adjustRegexLiteral, 4);
     tree = esprima.parse(escodegen.generate(syntax), options);
-    actual2 = JSON.stringify(tree, adjustRegexLiteral, 4);
+    const actual2 = JSON.stringify(tree, adjustRegexLiteral, 4);
     expect(actual).to.be.equal(expected);
     expect(actual2).to.be.equal(expected);
 }
 
 function testGenerate(expected, result) {
     'use strict';
-    let actual, options;
-
-    options = {
+    let options = {
         indent: '    ',
         parse: esprima.parse
     };
@@ -194,19 +188,13 @@ function testGenerate(expected, result) {
         options = updateDeeply(options, result.options);
     }
 
-    actual = escodegen.generate(result.generateFrom, options);
+    const actual = escodegen.generate(result.generateFrom, options);
     expect(actual).to.be.equal(expected);
-}
-
-function isGeneratorIdentityFixture(result) {
-    'use strict';
-    return !result.hasOwnProperty('generateFrom') &&
-        !result.hasOwnProperty('result');
 }
 
 function runTest(code, result) {
     'use strict';
-    if (result.hasOwnProperty('generateFrom')) {
+    if (Object.prototype.hasOwnProperty.call(result, 'generateFrom')) {
         testGenerate(code, result);
     } else {
         testIdentity(code, result);

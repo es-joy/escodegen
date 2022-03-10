@@ -56,13 +56,10 @@ const fixtures = [
 ];
 
 function testIdentity(code) {
-    let expected, tree, actual, options, commentOptions, commentTree, StringObject, err;
-
-    // alias, so that JSLint does not complain.
-    StringObject = String;
+    let tree, actual, commentTree;
 
     // once
-    options = {
+    const options = {
         comment: false,
         range: false,
         loc: false,
@@ -71,13 +68,13 @@ function testIdentity(code) {
     };
 
     tree = esprima.parse(code, options);
-    expected = JSON.stringify(tree, adjustRegexLiteral, 4);
+    const expected = JSON.stringify(tree, adjustRegexLiteral, 4);
     tree = esprima.parse(escodegen.generate(tree), options);
     actual = JSON.stringify(tree, adjustRegexLiteral, 4);
     expect(actual).to.be.equal(expected);
 
     // second, attachComments
-    commentOptions = {
+    const commentOptions = {
         comment: true,
         range: true,
         loc: false,
@@ -95,8 +92,7 @@ function testIdentity(code) {
 describe('identity test', function () {
     fixtures.forEach(function (filename) {
         it(filename, function () {
-            const source = fs.readFileSync(`${__dirname  }/3rdparty/${  slug(filename)  }.js`, 'utf-8'),
-                size = source.length;
+            const source = fs.readFileSync(`${__dirname  }/3rdparty/${  slug(filename)  }.js`, 'utf-8');
             testIdentity(source);
         });
     });
