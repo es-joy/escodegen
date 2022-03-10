@@ -1,10 +1,12 @@
 ## Escodegen
 [![npm version](https://badge.fury.io/js/escodegen.svg)](http://badge.fury.io/js/escodegen)
-[![Build Status](https://secure.travis-ci.org/estools/escodegen.svg)](http://travis-ci.org/estools/escodegen)
-[![Dependency Status](https://david-dm.org/estools/escodegen.svg)](https://david-dm.org/estools/escodegen)
-[![devDependency Status](https://david-dm.org/estools/escodegen/dev-status.svg)](https://david-dm.org/estools/escodegen#info=devDependencies)
+[![Build Status](https://secure.travis-ci.org/es-joy/escodegen.svg)](http://travis-ci.org/es-joy/escodegen)
+[![Dependency Status](https://david-dm.org/es-joy/escodegen.svg)](https://david-dm.org/es-joy/escodegen)
+[![devDependency Status](https://david-dm.org/es-joy/escodegen/dev-status.svg)](https://david-dm.org/es-joy/escodegen#info=devDependencies)
 
-Escodegen ([escodegen](http://github.com/estools/escodegen)) is an
+`@es-joy/escodegen` is a fork of [escodegen](http://github.com/estools/escodegen).
+
+`@es-joy/escodegen` ([escodegen](http://github.com/es-joy/escodegen)) is an
 [ECMAScript](http://www.ecma-international.org/publications/standards/Ecma-262.htm)
 (also popularly known as [JavaScript](http://en.wikipedia.org/wiki/JavaScript))
 code generator from [Mozilla's Parser API](https://developer.mozilla.org/en/SpiderMonkey/Parser_API)
@@ -42,7 +44,7 @@ escodegen.generate({
 
 produces the string `'40 + 2'`.
 
-See the [API page](https://github.com/estools/escodegen/wiki/API) for
+See the [API page](https://github.com/es-joy/escodegen/wiki/API) for
 options. To run the tests, execute `npm test` in the root directory.
 
 ### Building browser bundle / minified browser bundle
@@ -51,7 +53,7 @@ At first, execute `npm install` to install the all dev dependencies.
 After that,
 
 ```sh
-npm run-script build
+npm run build
 ```
 
 will generate `dist/escodegen.umd.js`, which can be used in browser environments.
@@ -59,7 +61,7 @@ will generate `dist/escodegen.umd.js`, which can be used in browser environments
 And,
 
 ```sh
-npm run-script build-min
+npm run build-min
 ```
 
 will generate the minified file `escodegen.browser.min.js`.

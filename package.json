@@ -1,8 +1,8 @@
 {
-    "name": "escodegen",
+    "name": "@es-joy/escodegen",
     "description": "ECMAScript code generator",
-    "homepage": "http://github.com/estools/escodegen",
-    "bugs": "http://github.com/estools/escodegen/issues",
+    "homepage": "http://github.com/es-joy/escodegen",
+    "bugs": "http://github.com/es-joy/escodegen/issues",
     "type": "module",
     "main": "./dist/escodegen.cjs",
     "exports": {
@@ -40,7 +40,7 @@
     "contributors": [],
     "repository": {
         "type": "git",
-        "url": "http://github.com/estools/escodegen.git"
+        "url": "http://github.com/es-joy/escodegen.git"
     },
     "dependencies": {
         "esprima": "^4.0.1",
