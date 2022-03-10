@@ -57,7 +57,7 @@ if (args.config) {
 }
 
 files.forEach(function (filename) {
-    var content = fs.readFileSync(filename, 'utf-8');
+    const content = fs.readFileSync(filename, 'utf-8');
     console.log(escodegen.generate(JSON.parse(content), options));
 });
 /* vim: set sw=4 ts=4 et tw=80 : */

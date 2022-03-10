@@ -26,9 +26,9 @@ import { generate, Precedence, attachComments, FORMAT_MINIFY, FORMAT_DEFAULTS } 
 
 // Make generate's first argument freezed.
 function freezing(escodegen) {
-    var original = escodegen.generate;
+    const original = escodegen.generate;
     escodegen.generate = function () {
-        var ast = arguments[0];
+        const ast = arguments[0];
         Object.freeze(ast);
         return original.apply(this, arguments);
     };

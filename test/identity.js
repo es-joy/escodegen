@@ -56,7 +56,7 @@ const fixtures = [
 ];
 
 function testIdentity(code) {
-    var expected, tree, actual, options, commentOptions, commentTree, StringObject, err;
+    let expected, tree, actual, options, commentOptions, commentTree, StringObject, err;
 
     // alias, so that JSLint does not complain.
     StringObject = String;
@@ -95,7 +95,7 @@ function testIdentity(code) {
 describe('identity test', function () {
     fixtures.forEach(function (filename) {
         it(filename, function () {
-            var source = fs.readFileSync(__dirname + '/3rdparty/' + slug(filename) + '.js', 'utf-8'),
+            const source = fs.readFileSync(`${__dirname  }/3rdparty/${  slug(filename)  }.js`, 'utf-8'),
                 size = source.length;
             testIdentity(source);
         });

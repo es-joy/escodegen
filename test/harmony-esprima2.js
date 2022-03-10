@@ -37,67 +37,67 @@ const data = {
         'class SomeClass { constructor() { if (new.target === SomeClass) { throw new Error(\'Boom\'); }}}': {
             type: 'Program',
             body: [ {
-                type: "ClassDeclaration",
+                type: 'ClassDeclaration',
                 id: {
-                    type: "Identifier",
-                    name: "SomeClass"
+                    type: 'Identifier',
+                    name: 'SomeClass'
                 },
                 superClass: null,
                 body: {
-                    type: "ClassBody",
+                    type: 'ClassBody',
                     body: [
                         {
-                            type: "MethodDefinition",
+                            type: 'MethodDefinition',
                             key: {
-                                type: "Identifier",
-                                name: "constructor"
+                                type: 'Identifier',
+                                name: 'constructor'
                             },
                             computed: false,
                             value: {
-                                type: "FunctionExpression",
+                                type: 'FunctionExpression',
                                 id: null,
                                 params: [],
                                 defaults: [],
                                 body: {
-                                    type: "BlockStatement",
+                                    type: 'BlockStatement',
                                     body: [
                                         {
-                                            type: "IfStatement",
+                                            type: 'IfStatement',
                                             test: {
-                                                type: "BinaryExpression",
-                                                operator: "===",
+                                                type: 'BinaryExpression',
+                                                operator: '===',
                                                 left: {
-                                                    type: "MetaProperty",
+                                                    type: 'MetaProperty',
                                                     meta: {
-                                                        type: "Identifier",
-                                                        name: "new"
+                                                        type: 'Identifier',
+                                                        name: 'new'
                                                     },
                                                     property: {
-                                                        type: "Identifier",
-                                                        name: "target"
+                                                        type: 'Identifier',
+                                                        name: 'target'
                                                     },
                                                 },
                                                 right: {
-                                                    type: "Identifier",
-                                                    name: "SomeClass"
+                                                    type: 'Identifier',
+                                                    name: 'SomeClass'
                                                 }
                                             },
                                             consequent: {
-                                                type: "BlockStatement",
+                                                type: 'BlockStatement',
                                                 body: [
                                                     {
-                                                        type: "ThrowStatement",
+                                                        type: 'ThrowStatement',
                                                         argument: {
-                                                            type: "NewExpression",
+                                                            type: 'NewExpression',
                                                             callee: {
-                                                                type: "Identifier",
-                                                                name: "Error"
+                                                                type: 'Identifier',
+                                                                name: 'Error'
                                                             },
                                                             arguments: [
                                                                 {
-                                                                    type: "Literal",
-                                                                    value: "Boom",
-                                                                    raw: "'Boom'"
+                                                                    type: 'Literal',
+                                                                    value: 'Boom',
+                                                                    raw: '\'Boom\''
                                                                 }
                                                             ]
                                                         }
@@ -111,7 +111,7 @@ const data = {
                                 generator: false,
                                 expression: false
                             },
-                            kind: "constructor",
+                            kind: 'constructor',
                             static: false
                         }
                     ],
@@ -122,7 +122,7 @@ const data = {
 };
 
 function updateDeeply(target, override) {
-    var key, val;
+    let key, val;
 
     function isHashObject(target) {
         return typeof target === 'object' && target instanceof Object && !(target instanceof RegExp);
@@ -158,7 +158,7 @@ function adjustRegexLiteral(key, value) {
 
 function testIdentity(code, syntax) {
     'use strict';
-    var expected, tree, actual, actual2, options, StringObject;
+    let expected, tree, actual, actual2, options, StringObject;
 
     // alias, so that JSLint does not complain.
     StringObject = String;
@@ -183,7 +183,7 @@ function testIdentity(code, syntax) {
 
 function testGenerate(expected, result) {
     'use strict';
-    var actual, options;
+    let actual, options;
 
     options = {
         indent: '    ',
@@ -217,7 +217,7 @@ describe('harmony 2.x test', function () {
     Object.keys(data).forEach(function (category) {
         Object.keys(data[category]).forEach(function (source) {
             it(category, function () {
-                var expected = data[category][source];
+                const expected = data[category][source];
                 runTest(source, expected);
             });
         });

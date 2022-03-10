@@ -31,7 +31,7 @@ import escodegen from './loader.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function test(code, expected) {
-    var tree, actual, options, StringObject;
+    let tree, actual, options, StringObject;
 
     // alias, so that JSLint does not complain.
     StringObject = String;
@@ -46,12 +46,12 @@ function test(code, expected) {
     tree = esprima.parse(code, options);
 
     // for UNIX text comment
-    actual = escodegen.generate(tree).replace(/[\n\r]$/, '') + '\n';
+    actual = `${escodegen.generate(tree).replace(/[\n\r]$/, '')  }\n`;
     expect(actual).to.be.equal(expected);
 }
 
 function testMin(code, expected) {
-    var tree, tree2, actual, actual2, options, StringObject;
+    let tree, tree2, actual, actual2, options, StringObject;
 
     // alias, so that JSLint does not complain.
     StringObject = String;
@@ -66,35 +66,35 @@ function testMin(code, expected) {
     tree = esprima.parse(code, options);
 
     // for UNIX text comment
-    actual = escodegen.generate(tree, {
+    actual = `${escodegen.generate(tree, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
-    }).replace(/[\n\r]$/, '') + '\n';
+    }).replace(/[\n\r]$/, '')  }\n`;
     expect(actual).to.be.equal(expected);
 
     // And ensure that minified value is exactly equal.
     tree2 = esprima.parse(actual, options);
-    actual2 = escodegen.generate(tree2, {
+    actual2 = `${escodegen.generate(tree2, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
-    }).replace(/[\n\r]$/, '') + '\n';
+    }).replace(/[\n\r]$/, '')  }\n`;
     expect(actual2).to.be.equal(actual);
 }
 
 const DIR = 'compare-harmony';
 
 describe('compare harmony test', function () {
-    fs.readdirSync(__dirname + '/' + DIR).sort().forEach(function(file) {
-        var code, expected, exp, min;
+    fs.readdirSync(`${__dirname  }/${  DIR}`).sort().forEach(function(file) {
+        let code, expected, exp, min;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file) && !/expected\.min\.js$/.test(file)) {
             it(file, function () {
                 exp = file.replace(/\.js$/, '.expected.js');
                 min = file.replace(/\.js$/, '.expected.min.js');
-                code = fs.readFileSync(__dirname + '/' + DIR + '/' + file, 'utf-8');
-                expected = fs.readFileSync(__dirname + '/' + DIR + '/' + exp, 'utf-8');
+                code = fs.readFileSync(`${__dirname  }/${  DIR  }/${  file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname  }/${  DIR  }/${  exp}`, 'utf-8');
                 test(code, expected);
-                if (fs.existsSync(__dirname + '/' + DIR + '/' + min)) {
-                    expected = fs.readFileSync(__dirname + '/' + DIR + '/' + min, 'utf-8');
+                if (fs.existsSync(`${__dirname  }/${  DIR  }/${  min}`)) {
+                    expected = fs.readFileSync(`${__dirname  }/${  DIR  }/${  min}`, 'utf-8');
                     testMin(code, expected);
                 }
             });

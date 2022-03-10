@@ -189,7 +189,7 @@ const fixtures = {
 };
 
 function testAPI(code, result) {
-    var expected, res, actual;
+    let expected, res, actual;
     expected = JSON.stringify(result.result, null, 4);
     if (typeof result.property !== 'undefined') {
         res = escodegen[result.property];

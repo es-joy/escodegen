@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FILES_PATH = path.join(__dirname, './asts');
 
-var FILES = [
+const FILES = [
     'jQuery 1.7.1',
     'jQuery 1.6.4',
     'jQuery.Mobile 1.0',

@@ -26,7 +26,7 @@ import esprima from 'esprima';
 import escodegen from './loader.js';
 
 const data = {
-    'DirectiveStatement': {
+    DirectiveStatement: {
 
         '\'use strict\';': {
             type: 'Program',
@@ -189,7 +189,7 @@ const data = {
 };
 
 function runTest(expected, result) {
-    var actual, options;
+    let actual, options;
 
     options = {
         indent: '    ',

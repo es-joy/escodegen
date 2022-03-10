@@ -36,7 +36,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 chai.use(chaiExclude);
 
 function test(code, expected) {
-    var tree, actual, actualTree, options;
+    let tree, actual, actualTree, options;
 
     options = {
         ranges: false,
@@ -55,7 +55,7 @@ function test(code, expected) {
 }
 
 function testMin(code, expected) {
-    var tree, actual, actualTree, options;
+    let tree, actual, actualTree, options;
 
     options = {
         ranges: false,
@@ -66,10 +66,10 @@ function testMin(code, expected) {
     tree = acorn.parse(code, options);
 
     // for UNIX text comment
-    actual = escodegen.generate(tree, {
+    actual = `${escodegen.generate(tree, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
-    }).replace(/[\n\r]$/, '') + '\n';
+    }).replace(/[\n\r]$/, '')  }\n`;
     actualTree = acorn.parse(actual, options);
 
     expect(actual).to.be.equal(expected);
@@ -77,17 +77,17 @@ function testMin(code, expected) {
 }
 
 describe('compare acorn es2021 test', function () {
-    fs.readdirSync(__dirname + '/compare-acorn-es2021').sort().forEach(function(file) {
-        var code, expected, exp, min;
+    fs.readdirSync(`${__dirname  }/compare-acorn-es2021`).sort().forEach(function(file) {
+        let code, expected, exp, min;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file) && !/expected\.min\.js$/.test(file)) {
             it(file, function () {
                 exp = file.replace(/\.js$/, '.expected.js');
                 min = file.replace(/\.js$/, '.expected.min.js');
-                code = fs.readFileSync(__dirname + '/compare-acorn-es2021/' + file, 'utf-8');
-                expected = fs.readFileSync(__dirname + '/compare-acorn-es2021/' + exp, 'utf-8');
+                code = fs.readFileSync(`${__dirname  }/compare-acorn-es2021/${  file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname  }/compare-acorn-es2021/${  exp}`, 'utf-8');
                 test(code, expected);
-                if (fs.existsSync(__dirname + '/compare-acorn-es2021/' + min)) {
-                    expected = fs.readFileSync(__dirname + '/compare-acorn-es2021/' + min, 'utf-8');
+                if (fs.existsSync(`${__dirname  }/compare-acorn-es2021/${  min}`)) {
+                    expected = fs.readFileSync(`${__dirname  }/compare-acorn-es2021/${  min}`, 'utf-8');
                     testMin(code, expected);
                 }
             });

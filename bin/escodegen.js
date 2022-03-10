@@ -64,7 +64,7 @@ if (args.config) {
 }
 
 files.forEach(function (filename) {
-    var content = fs.readFileSync(filename, 'utf-8'),
+    const content = fs.readFileSync(filename, 'utf-8'),
         syntax = esprima.parse(content, esprimaOptions);
 
     if (options && options.comment) {

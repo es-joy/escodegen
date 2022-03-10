@@ -32,7 +32,7 @@ import escodegen from './loader.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function test(code, expected) {
-    var tree, actual, options, StringObject;
+    let tree, actual, options, StringObject;
 
     // alias, so that JSLint does not complain.
     StringObject = String;
@@ -49,25 +49,25 @@ function test(code, expected) {
     tree = escodegen.attachComments(tree, tree.comments, tree.tokens);
 
     // for UNIX text comment
-    actual = escodegen.generate(tree, {
+    actual = `${escodegen.generate(tree, {
         comment: true,
         format: {
             indent: {
                 adjustMultilineComment: true
             }
         }
-    }).replace(/[\n\r]$/, '') + '\n';
+    }).replace(/[\n\r]$/, '')  }\n`;
     expect(actual).to.be.equal(expected);
 }
 
 describe('comment test', function () {
-    fs.readdirSync(__dirname + '/comment').sort().forEach(function(file) {
-        var code, expected, p;
+    fs.readdirSync(`${__dirname  }/comment`).sort().forEach(function(file) {
+        let code, expected, p;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file)) {
             it(file, function () {
                 p = file.replace(/\.js$/, '.expected.js');
-                code = fs.readFileSync(__dirname + '/comment/' + file, 'utf-8');
-                expected = fs.readFileSync(__dirname + '/comment/' + p, 'utf-8');
+                code = fs.readFileSync(`${__dirname  }/comment/${  file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname  }/comment/${  p}`, 'utf-8');
                 test(code, expected);
             });
         }

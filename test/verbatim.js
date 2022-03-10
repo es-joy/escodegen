@@ -32,7 +32,7 @@ function make_eval(code) {
             type: 'Identifier',
             name: 'eval'
         },
-        'arguments': [{
+        arguments: [{
             type: 'Literal',
             value: code
         }],
@@ -41,13 +41,13 @@ function make_eval(code) {
 }
 
 function runTest(expected, result, verbatim) {
-    var actual, options;
+    let actual, options;
 
     options = {
         indent: '    ',
         directive: true,
         parse: esprima.parse,
-        verbatim: verbatim
+        verbatim
     };
 
     expect(function () {
@@ -57,30 +57,30 @@ function runTest(expected, result, verbatim) {
 }
 
 const StringData = {
-    'DISABLED': {
-        "eval('foo');": {
+    DISABLED: {
+        'eval(\'foo\');': {
             type: 'ExpressionStatement',
             expression: make_eval('foo')
         }
     },
 
-    'verbatim': {
+    verbatim: {
         // Check it doesn't apply to statements
-        "continue;": {
+        'continue;': {
             type: 'ContinueStatement',
             verbatim: 'FOOBARBAZ'
         },
-        "foo;": {
+        'foo;': {
             type: 'ExpressionStatement',
             expression: make_eval('foo')
         },
-        "true && (foo)": {
+        'true && (foo)': {
             type: 'BinaryExpression',
             operator: '&&',
             left: { type: 'Literal', value: true },
             right: make_eval('foo')
         },
-        "var a = (window.location.href);": {
+        'var a = (window.location.href);': {
             type: 'VariableDeclaration',
             kind: 'var',
             declarations: [{
@@ -90,19 +90,19 @@ const StringData = {
             }]
         },
         // Multiline
-        "if (true) {\n    foo('bar');\n    foo('baz');\n}": {
+        'if (true) {\n    foo(\'bar\');\n    foo(\'baz\');\n}': {
             type: 'IfStatement',
             test: { type: 'Literal', value: true },
             consequent: {
                 type: 'BlockStatement',
                 body: [{
                     type: 'ExpressionStatement',
-                    expression: make_eval("foo('bar');\nfoo('baz')")
+                    expression: make_eval('foo(\'bar\');\nfoo(\'baz\')')
                 }]
             }
         },
         // Embedded into sequences
-        "foo(a, (10, 20), b)": {
+        'foo(a, (10, 20), b)': {
             type: 'CallExpression',
             callee: { type: 'Identifier', name: 'foo' },
             arguments: [{
@@ -116,7 +116,7 @@ const StringData = {
             }]
         },
         // Floating point
-        "(0).a": {
+        '(0).a': {
             type: 'MemberExpression',
             object: { type: 'Literal', value: 0, verbatim: '0' },
             property: { type: 'Identifier', name: 'a' },
@@ -126,11 +126,11 @@ const StringData = {
 };
 
 describe('verbatim string test', function () {
-    var data = StringData;
+    const data = StringData;
     Object.keys(data).forEach(function (category) {
         it(category, function () {
             Object.keys(data[category]).forEach(function (source) {
-                var expected = data[category][source];
+                const expected = data[category][source];
                 runTest(source, expected, category);
             });
         });
@@ -138,21 +138,21 @@ describe('verbatim string test', function () {
 });
 
 const ObjectData = {
-    'verbatim': {
+    verbatim: {
         // Floating point
-        "(0).a": {
+        '(0).a': {
             type: 'MemberExpression',
             object: { type: 'Literal', value: 0, verbatim: { content: '0' } },
             property: { type: 'Identifier', name: 'a' },
             computed: false
         },
-        "([]).a": {
+        '([]).a': {
             type: 'MemberExpression',
             object: { type: 'Literal', verbatim: { content: '[]' } },
             property: { type: 'Identifier', name: 'a' },
             computed: false
         },
-        "[].a": {
+        '[].a': {
             type: 'MemberExpression',
             object: { type: 'Literal', verbatim: { content: '[]', precedence: escodegen.Precedence.Primary } },
             property: { type: 'Identifier', name: 'a' },
@@ -162,11 +162,11 @@ const ObjectData = {
 };
 
 describe('verbatim object test', function () {
-    var data = ObjectData;
+    const data = ObjectData;
     Object.keys(data).forEach(function (category) {
         it(category, function () {
             Object.keys(data[category]).forEach(function (source) {
-                var expected = data[category][source];
+                const expected = data[category][source];
                 runTest(source, expected, category);
             });
         });

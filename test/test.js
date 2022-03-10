@@ -2863,7 +2863,7 @@ const data = {
 
     },
 
-    'Comments': {
+    Comments: {
 
         '/* block comment */ 42': {
             type: 'ExpressionStatement',
@@ -3246,7 +3246,7 @@ const data = {
                                     end: { line: 2, column: 6 }
                                 }
                             },
-                            'arguments': [],
+                            arguments: [],
                             range: [25, 33],
                             loc: {
                                 start: { line: 2, column: 0 },
@@ -3322,7 +3322,7 @@ const data = {
                                     end: { line: 1, column: 46 }
                                 }
                             },
-                            'arguments': [],
+                            arguments: [],
                             range: [41, 48],
                             loc: {
                                 start: { line: 1, column: 41 },
@@ -3363,7 +3363,7 @@ const data = {
 
     'Numeric Literals': {
 
-        '0': {
+        0: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Literal',
@@ -3382,7 +3382,7 @@ const data = {
             }
         },
 
-        '42': {
+        42: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Literal',
@@ -3420,7 +3420,7 @@ const data = {
             }
         },
 
-        '3.14159': {
+        3.14159: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Literal',
@@ -3439,7 +3439,7 @@ const data = {
             }
         },
 
-        '6.02214179e+23': {
+        6.02214179e+23: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Literal',
@@ -4469,7 +4469,7 @@ const data = {
                         end: { line: 1, column: 10 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 10],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4496,7 +4496,7 @@ const data = {
                         end: { line: 1, column: 10 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 12],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4525,14 +4525,14 @@ const data = {
                             end: { line: 1, column: 11 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [4, 11],
                     loc: {
                         start: { line: 1, column: 4 },
                         end: { line: 1, column: 11 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 11],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4561,14 +4561,14 @@ const data = {
                             end: { line: 1, column: 11 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [4, 13],
                     loc: {
                         start: { line: 1, column: 4 },
                         end: { line: 1, column: 13 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 13],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4600,7 +4600,7 @@ const data = {
                                 end: { line: 1, column: 7 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [0, 9],
                         loc: {
                             start: { line: 1, column: 0 },
@@ -4622,7 +4622,7 @@ const data = {
                         end: { line: 1, column: 13 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 15],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4667,7 +4667,7 @@ const data = {
                         end: { line: 1, column: 12 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 12],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4713,7 +4713,7 @@ const data = {
                         end: { line: 1, column: 11 }
                     }
                 },
-                'arguments': [],
+                arguments: [],
                 range: [0, 13],
                 loc: {
                     start: { line: 1, column: 0 },
@@ -4740,7 +4740,7 @@ const data = {
                         end: { line: 1, column: 3 }
                     }
                 },
-                'arguments': [{
+                arguments: [{
                     type: 'Identifier',
                     name: 'bar',
                     range: [4, 7],
@@ -5091,7 +5091,7 @@ const data = {
                             end: { line: 1, column: 8 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Literal',
                         value: 42,
                         raw: '42',
@@ -5150,7 +5150,7 @@ const data = {
                                     end: { line: 1, column: 8 }
                                 }
                             },
-                            'arguments': [{
+                            arguments: [{
                                 type: 'Literal',
                                 value: 42,
                                 raw: '42',
@@ -5181,7 +5181,7 @@ const data = {
                             end: { line: 1, column: 21 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Literal',
                         value: 14,
                         raw: '14',
@@ -5304,7 +5304,7 @@ const data = {
                         end: { line: 1, column: 39 }
                     }
                 },
-                'arguments': [{
+                arguments: [{
                     type: 'Literal',
                     value: 2014,
                     raw: '2014',
@@ -5676,39 +5676,39 @@ const data = {
         },
 
         '+ ++x': {
-          type: 'Program',
-          body:
+            type: 'Program',
+            body:
            [ { type: 'ExpressionStatement',
                expression:
                 { type: 'UnaryExpression',
-                  operator: '+',
-                  argument:
+                    operator: '+',
+                    argument:
                    { type: 'UpdateExpression',
-                     operator: '++',
-                     argument:
+                       operator: '++',
+                       argument:
                       { type: 'Identifier',
-                        name: 'x',
-                        range: [ 4, 5 ],
-                        loc:
+                          name: 'x',
+                          range: [ 4, 5 ],
+                          loc:
                          { start: { line: 1, column: 4 },
-                           end: { line: 1, column: 5 } } },
-                     prefix: true,
-                     range: [ 1, 6 ],
-                     loc:
+                             end: { line: 1, column: 5 } } },
+                       prefix: true,
+                       range: [ 1, 6 ],
+                       loc:
                       { start: { line: 1, column: 1 },
-                        end: { line: 1, column: 6 } } },
-                  range: [ 0, 6 ],
-                  loc:
+                          end: { line: 1, column: 6 } } },
+                    range: [ 0, 6 ],
+                    loc:
                    { start: { line: 1, column: 0 },
-                     end: { line: 1, column: 6 } } },
+                       end: { line: 1, column: 6 } } },
                range: [ 0, 6 ],
                loc:
                 { start: { line: 1, column: 0 },
-                  end: { line: 1, column: 6 } } } ],
-          range: [ 0, 6 ],
-          loc:
+                    end: { line: 1, column: 6 } } } ],
+            range: [ 0, 6 ],
+            loc:
            { start: { line: 1, column: 0 },
-             end: { line: 1, column: 6 } } },
+               end: { line: 1, column: 6 } } },
 
         '--x': {
             type: 'ExpressionStatement',
@@ -5739,39 +5739,39 @@ const data = {
         },
 
         '- --x': {
-          type: 'Program',
-          body:
+            type: 'Program',
+            body:
            [ { type: 'ExpressionStatement',
                expression:
                 { type: 'UnaryExpression',
-                  operator: '-',
-                  argument:
+                    operator: '-',
+                    argument:
                    { type: 'UpdateExpression',
-                     operator: '--',
-                     argument:
+                       operator: '--',
+                       argument:
                       { type: 'Identifier',
-                        name: 'x',
-                        range: [ 4, 5 ],
-                        loc:
+                          name: 'x',
+                          range: [ 4, 5 ],
+                          loc:
                          { start: { line: 1, column: 4 },
-                           end: { line: 1, column: 5 } } },
-                     prefix: true,
-                     range: [ 1, 6 ],
-                     loc:
+                             end: { line: 1, column: 5 } } },
+                       prefix: true,
+                       range: [ 1, 6 ],
+                       loc:
                       { start: { line: 1, column: 1 },
-                        end: { line: 1, column: 6 } } },
-                  range: [ 0, 6 ],
-                  loc:
+                          end: { line: 1, column: 6 } } },
+                    range: [ 0, 6 ],
+                    loc:
                    { start: { line: 1, column: 0 },
-                     end: { line: 1, column: 6 } } },
+                       end: { line: 1, column: 6 } } },
                range: [ 0, 6 ],
                loc:
                 { start: { line: 1, column: 0 },
-                  end: { line: 1, column: 6 } } } ],
-          range: [ 0, 6 ],
-          loc:
+                    end: { line: 1, column: 6 } } } ],
+            range: [ 0, 6 ],
+            loc:
            { start: { line: 1, column: 0 },
-             end: { line: 1, column: 6 } } },
+               end: { line: 1, column: 6 } } },
 
         '++eval': {
             type: 'ExpressionStatement',
@@ -8760,7 +8760,7 @@ const data = {
 
     },
 
-    'Block': {
+    Block: {
 
         '{ foo }': {
             type: 'BlockStatement',
@@ -8803,7 +8803,7 @@ const data = {
                             end: { line: 1, column: 8 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [2, 10],
                     loc: {
                         start: { line: 1, column: 2 },
@@ -8828,7 +8828,7 @@ const data = {
                             end: { line: 1, column: 18 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [12, 20],
                     loc: {
                         start: { line: 1, column: 12 },
@@ -9675,7 +9675,7 @@ const data = {
 
     'Expression Statement': {
 
-        'x': {
+        x: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Identifier',
@@ -9727,7 +9727,7 @@ const data = {
             }
         },
 
-        '\\u0061': {
+        \u0061: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Identifier',
@@ -9745,7 +9745,7 @@ const data = {
             }
         },
 
-        'a\\u0061': {
+        a\u0061: {
             type: 'ExpressionStatement',
             expression: {
                 type: 'Identifier',
@@ -9827,7 +9827,7 @@ const data = {
                             end: { line: 1, column: 24 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [13, 26],
                     loc: {
                         start: { line: 1, column: 13 },
@@ -10019,7 +10019,7 @@ const data = {
                             end: { line: 1, column: 24 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [13, 26],
                     loc: {
                         start: { line: 1, column: 13 },
@@ -10045,7 +10045,7 @@ const data = {
                             end: { line: 1, column: 40 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [33, 42],
                     loc: {
                         start: { line: 1, column: 33 },
@@ -10084,7 +10084,7 @@ const data = {
                             end: { line: 1, column: 7 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [3, 9],
                     loc: {
                         start: { line: 1, column: 3 },
@@ -10129,7 +10129,7 @@ const data = {
                             end: { line: 1, column: 7 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [3, 9],
                     loc: {
                         start: { line: 1, column: 3 },
@@ -10335,7 +10335,7 @@ const data = {
                             end: { line: 1, column: 24 }
                         }
                     },
-                    'arguments': [],
+                    arguments: [],
                     range: [13, 26],
                     loc: {
                         start: { line: 1, column: 13 },
@@ -10988,7 +10988,7 @@ const data = {
                             end: { line: 1, column: 31 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [32, 33],
@@ -11049,7 +11049,7 @@ const data = {
                             end: { line: 1, column: 22 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [23, 24],
@@ -11129,7 +11129,7 @@ const data = {
                             end: { line: 1, column: 27 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [28, 29],
@@ -11218,7 +11218,7 @@ const data = {
                             end: { line: 1, column: 32 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [33, 34],
@@ -11298,7 +11298,7 @@ const data = {
                             end: { line: 1, column: 27 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [28, 29],
@@ -11387,7 +11387,7 @@ const data = {
                             end: { line: 1, column: 32 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [33, 34],
@@ -11520,7 +11520,7 @@ const data = {
                             end: { line: 1, column: 60 }
                         }
                     },
-                    'arguments': [{
+                    arguments: [{
                         type: 'Identifier',
                         name: 'x',
                         range: [61, 62],
@@ -12341,7 +12341,7 @@ const data = {
                                 end: { line: 1, column: 29 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [27, 31],
                         loc: {
                             start: { line: 1, column: 27 },
@@ -12411,7 +12411,7 @@ const data = {
                                 end: { line: 1, column: 29 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [27, 31],
                         loc: {
                             start: { line: 1, column: 27 },
@@ -12848,7 +12848,7 @@ const data = {
                                     end: { line: 1, column: 23 }
                                 }
                             },
-                            'arguments': [{
+                            arguments: [{
                                 type: 'Identifier',
                                 name: 'e',
                                 range: [24, 25],
@@ -12891,70 +12891,70 @@ const data = {
 
         'try {\n} catch (ex if ex instanceof A) {\n} catch (ex if ex instanceof B) {\n} catch (ex) {\n}': {
             generateFrom: {
-                type: "Program",
+                type: 'Program',
                 body: [{
-                    type: "TryStatement",
+                    type: 'TryStatement',
                     block: {
-                        type: "BlockStatement",
+                        type: 'BlockStatement',
                         body: []
                     },
                     guardedHandlers: [
                         {
-                            type: "CatchClause",
+                            type: 'CatchClause',
                             param: {
-                                type: "Identifier",
-                                name: "ex"
+                                type: 'Identifier',
+                                name: 'ex'
                             },
                             guard: {
-                                type: "BinaryExpression",
-                                operator: "instanceof",
+                                type: 'BinaryExpression',
+                                operator: 'instanceof',
                                 left: {
-                                    type: "Identifier",
-                                    name: "ex"
+                                    type: 'Identifier',
+                                    name: 'ex'
                                 },
                                 right: {
-                                    type: "Identifier",
-                                    name: "A"
+                                    type: 'Identifier',
+                                    name: 'A'
                                 }
                             },
                             body: {
-                                type: "BlockStatement",
+                                type: 'BlockStatement',
                                 body: []
                             }
                         },
                         {
-                            type: "CatchClause",
+                            type: 'CatchClause',
                             param: {
-                                type: "Identifier",
-                                name: "ex"
+                                type: 'Identifier',
+                                name: 'ex'
                             },
                             guard: {
-                                type: "BinaryExpression",
-                                operator: "instanceof",
+                                type: 'BinaryExpression',
+                                operator: 'instanceof',
                                 left: {
-                                    type: "Identifier",
-                                    name: "ex"
+                                    type: 'Identifier',
+                                    name: 'ex'
                                 },
                                 right: {
-                                    type: "Identifier",
-                                    name: "B"
+                                    type: 'Identifier',
+                                    name: 'B'
                                 }
                             },
                             body: {
-                                type: "BlockStatement",
+                                type: 'BlockStatement',
                                 body: []
                             }
                         }
                     ],
                     handler: {
-                        type: "CatchClause",
+                        type: 'CatchClause',
                         param: {
-                            type: "Identifier",
-                            name: "ex"
+                            type: 'Identifier',
+                            name: 'ex'
                         },
                         guard: null,
                         body: {
-                            type: "BlockStatement",
+                            type: 'BlockStatement',
                             body: []
                         }
                     },
@@ -12990,7 +12990,7 @@ const data = {
                                 end: { line: 1, column: 25 }
                             }
                         },
-                        'arguments': [{
+                        arguments: [{
                             type: 'Identifier',
                             name: 'stuff',
                             range: [26, 31],
@@ -13041,7 +13041,7 @@ const data = {
                                 end: { line: 1, column: 12 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [6, 14],
                         loc: {
                             start: { line: 1, column: 6 },
@@ -13087,7 +13087,7 @@ const data = {
                                     end: { line: 1, column: 33 }
                                 }
                             },
-                            'arguments': [{
+                            arguments: [{
                                 type: 'Identifier',
                                 name: 'e',
                                 range: [34, 35],
@@ -13145,7 +13145,7 @@ const data = {
                                 end: { line: 1, column: 12 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [6, 14],
                         loc: {
                             start: { line: 1, column: 6 },
@@ -13191,7 +13191,7 @@ const data = {
                                     end: { line: 1, column: 33 }
                                 }
                             },
-                            'arguments': [{
+                            arguments: [{
                                 type: 'Identifier',
                                 name: 'e',
                                 range: [34, 35],
@@ -13239,7 +13239,7 @@ const data = {
                                 end: { line: 1, column: 56 }
                             }
                         },
-                        'arguments': [{
+                        arguments: [{
                             type: 'Identifier',
                             name: 'stuff',
                             range: [57, 62],
@@ -13387,7 +13387,7 @@ const data = {
                                 end: { line: 1, column: 24 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [19, 26],
                         loc: {
                             start: { line: 1, column: 19 },
@@ -13671,7 +13671,7 @@ const data = {
                                 end: { line: 1, column: 25 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [20, 27],
                         loc: {
                             start: { line: 1, column: 20 },
@@ -13740,7 +13740,7 @@ const data = {
                                 end: { line: 1, column: 28 }
                             }
                         },
-                        'arguments': [],
+                        arguments: [],
                         range: [23, 30],
                         loc: {
                             start: { line: 1, column: 23 },
@@ -13798,7 +13798,7 @@ const data = {
                                         end: { line: 1, column: 27 }
                                     }
                                 },
-                                'arguments': [],
+                                arguments: [],
                                 range: [22, 29],
                                 loc: {
                                     start: { line: 1, column: 22 },
@@ -13985,7 +13985,7 @@ const data = {
                                         end: { line: 1, column: 33 }
                                     }
                                 },
-                                'arguments': [],
+                                arguments: [],
                                 range: [28, 35],
                                 loc: {
                                     start: { line: 1, column: 28 },
@@ -14906,7 +14906,7 @@ function adjustRegexLiteral(key, value) {
 }
 
 function testIdentity(code, syntax) {
-    var expected, tree, actual, actual2, options, StringObject;
+    let expected, tree, actual, actual2, options, StringObject;
 
     // alias, so that JSLint does not complain.
     StringObject = String;
@@ -14932,7 +14932,7 @@ function testIdentity(code, syntax) {
 }
 
 function testGenerate(expected, result) {
-    var actual, options;
+    let actual, options;
 
     options = {
         indent: '    ',
@@ -14962,7 +14962,7 @@ describe('general test', function () {
     Object.keys(data).forEach(function (category) {
         it(category, function () {
             Object.keys(data[category]).forEach(function (source) {
-                var expected = data[category][source];
+                const expected = data[category][source];
                 runTest(source, expected);
             });
         });
