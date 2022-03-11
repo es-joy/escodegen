@@ -26,7 +26,7 @@ Escodegen can be used in a web browser:
 Or in a Node.js application via npm:
 
 ```sh
-npm install escodegen
+npm install @es-joy/escodegen
 ```
 
 ### Usage
