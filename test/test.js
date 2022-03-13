@@ -14906,8 +14906,6 @@ function adjustRegexLiteral(key, value) {
 }
 
 function testIdentity(code, syntax) {
-    let expected, tree, actual, actual2;
-
     const options = {
         comment: false,
         range: false,
@@ -14916,8 +14914,9 @@ function testIdentity(code, syntax) {
         raw: false
     };
 
+    let actual, actual2, expected;
     expect(function () {
-        tree = esprima.parse(code, options);
+        let tree = esprima.parse(code, options);
         expected = JSON.stringify(tree, adjustRegexLiteral, 4);
         tree = esprima.parse(escodegen.generate(tree), options);
         actual = JSON.stringify(tree, adjustRegexLiteral, 4);
@@ -14929,13 +14928,12 @@ function testIdentity(code, syntax) {
 }
 
 function testGenerate(expected, result) {
-    let actual;
-
     const options = {
         indent: '    ',
         parse: esprima.parse
     };
 
+    let actual;
     expect(function () {
         actual = escodegen.generate(result.generateFrom, options);
     }).not.to.be.throw();

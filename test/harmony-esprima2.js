@@ -122,15 +122,13 @@ const data = {
 };
 
 function updateDeeply(target, override) {
-    let key, val;
-
     function isHashObject(target) {
         return typeof target === 'object' && target instanceof Object && !(target instanceof RegExp);
     }
 
-    for (key in override) {
+    for (const key in override) {
         if (Object.prototype.hasOwnProperty.call(override, key)) {
-            val = override[key];
+            const val = override[key];
             if (isHashObject(val)) {
                 if (isHashObject(target[key])) {
                     updateDeeply(target[key], val);
@@ -149,7 +147,6 @@ function updateDeeply(target, override) {
 // convert it to a string literal, otherwise it will be decoded
 // as object "{}" and the regular expression would be lost.
 function adjustRegexLiteral(key, value) {
-    'use strict';
     if (key === 'value' && value instanceof RegExp) {
         value = value.toString();
     }
@@ -157,8 +154,6 @@ function adjustRegexLiteral(key, value) {
 }
 
 function testIdentity(code, syntax) {
-    'use strict';
-
     const options = {
         comment: false,
         range: false,
@@ -178,7 +173,6 @@ function testIdentity(code, syntax) {
 }
 
 function testGenerate(expected, result) {
-    'use strict';
     let options = {
         indent: '    ',
         parse: esprima.parse
@@ -193,7 +187,6 @@ function testGenerate(expected, result) {
 }
 
 function runTest(code, result) {
-    'use strict';
     if (Object.prototype.hasOwnProperty.call(result, 'generateFrom')) {
         testGenerate(code, result);
     } else {

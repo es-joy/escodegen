@@ -223,8 +223,7 @@ function endsWithLineTerminator(str) {
 }
 
 function merge(target, override) {
-    let key;
-    for (key in override) {
+    for (const key in override) {
         if (Object.prototype.hasOwnProperty.call(override, key)) {
             target[key] = override[key];
         }
@@ -233,15 +232,13 @@ function merge(target, override) {
 }
 
 function updateDeeply(target, override) {
-    let key, val;
-
     function isHashObject(target) {
         return typeof target === 'object' && target instanceof Object && !(target instanceof RegExp);
     }
 
-    for (key in override) {
+    for (const key in override) {
         if (Object.prototype.hasOwnProperty.call(override, key)) {
-            val = override[key];
+            const val = override[key];
             if (isHashObject(val)) {
                 if (isHashObject(target[key])) {
                     updateDeeply(target[key], val);
@@ -257,8 +254,6 @@ function updateDeeply(target, override) {
 }
 
 function generateNumber(value) {
-    let result, point, temp, exponent, pos;
-
     if (value !== value) {
         throw new Error('Numeric literal whose value is NaN');
     }
@@ -270,19 +265,20 @@ function generateNumber(value) {
         return json ? 'null' : renumber ? '1e400' : '1e+400';
     }
 
-    result = `${value}`;
+    let result = `${value}`;
     if (!renumber || result.length < 3) {
         return result;
     }
 
-    point = result.indexOf('.');
+    let point = result.indexOf('.');
     if (!json && result.charCodeAt(0) === 0x30  /* 0 */ && point === 1) {
         point = 0;
         result = result.slice(1);
     }
-    temp = result;
+    let temp = result;
     result = result.replace('e+', 'e');
-    exponent = 0;
+    let exponent = 0;
+    let pos;
     if ((pos = temp.indexOf('e')) > 0) {
         exponent = +temp.slice(pos + 1);
         temp = temp.slice(0, pos);
@@ -318,31 +314,30 @@ function escapeRegExpCharacter(ch, previousIsBackslash) {
     // not handling '\' and handling \u2028 or \u2029 to unicode escape sequence
     if ((ch & ~1) === 0x2028) {
         return (previousIsBackslash ? 'u' : '\\u') + ((ch === 0x2028) ? '2028' : '2029');
-    } else if (ch === 10 || ch === 13) {  // \n, \r
+    }
+    if (ch === 10 || ch === 13) {  // \n, \r
         return (previousIsBackslash ? '' : '\\') + ((ch === 10) ? 'n' : 'r');
     }
     return String.fromCharCode(ch);
 }
 
 function generateRegExp(reg) {
-    let match, result, flags, i, iz, ch, characterInBrack, previousIsBackslash;
-
-    result = reg.toString();
+    let result = reg.toString();
 
     if (reg.source) {
         // extract flag from toString result
-        match = result.match(/\/([^/]*)$/);
+        const match = result.match(/\/([^/]*)$/);
         if (!match) {
             return result;
         }
 
-        [, flags] = match;
+        const [, flags] = match;
         result = '';
 
-        characterInBrack = false;
-        previousIsBackslash = false;
-        for (i = 0, iz = reg.source.length; i < iz; ++i) {
-            ch = reg.source.charCodeAt(i);
+        let characterInBrack = false;
+        let previousIsBackslash = false;
+        for (let i = 0, iz = reg.source.length; i < iz; ++i) {
+            const ch = reg.source.charCodeAt(i);
 
             if (!previousIsBackslash) {
                 if (characterInBrack) {
@@ -422,11 +417,9 @@ function escapeDisallowedCharacter(code) {
 }
 
 function escapeDirective(str) {
-    let i, iz, code, quote;
-
-    quote = quotes === 'double' ? '"' : '\'';
-    for (i = 0, iz = str.length; i < iz; ++i) {
-        code = str.charCodeAt(i);
+    let quote = quotes === 'double' ? '"' : '\'';
+    for (let i = 0, iz = str.length; i < iz; ++i) {
+        const code = str.charCodeAt(i);
         if (code === 0x27  /* ' */) {
             quote = '"';
             break;
@@ -442,10 +435,10 @@ function escapeDirective(str) {
 }
 
 function escapeString(str) {
-    let result = '', i, len, code, singleQuotes = 0, doubleQuotes = 0;
+    let result = '', singleQuotes = 0, doubleQuotes = 0;
 
-    for (i = 0, len = str.length; i < len; ++i) {
-        code = str.charCodeAt(i);
+    for (let i = 0, len = str.length; i < len; ++i) {
+        const code = str.charCodeAt(i);
         if (code === 0x27  /* ' */) {
             ++singleQuotes;
         } else if (code === 0x22  /* " */) {
@@ -472,8 +465,8 @@ function escapeString(str) {
     str = result;
     result = quote;
 
-    for (i = 0, len = str.length; i < len; ++i) {
-        code = str.charCodeAt(i);
+    for (let i = 0, len = str.length; i < len; ++i) {
+        const code = str.charCodeAt(i);
         if ((code === 0x27  /* ' */ && single) || (code === 0x22  /* " */ && !single)) {
             result += '\\';
         }
@@ -488,9 +481,9 @@ function escapeString(str) {
      * either strings or nested arrays
      */
 function flattenToString(arr) {
-    let i, iz, elem, result = '';
-    for (i = 0, iz = arr.length; i < iz; ++i) {
-        elem = arr[i];
+    let result = '';
+    for (let i = 0, iz = arr.length; i < iz; ++i) {
+        const elem = arr[i];
         result += Array.isArray(elem) ? flattenToString(elem) : elem;
     }
     return result;
@@ -506,16 +499,14 @@ function toSourceNodeWhenNeeded(generated, node) {
         // if a string, just return it
         if (Array.isArray(generated)) {
             return flattenToString(generated);
-        } else {
-            return generated;
         }
+        return generated;
     }
     if (node == null) {
         if (generated instanceof SourceNode) {
             return generated;
-        } else {
-            node = {};
         }
+        node = {};
     }
     if (node.loc == null) {
         return new SourceNode(null, null, sourceMap, generated, node.name || null);
@@ -524,7 +515,7 @@ function toSourceNodeWhenNeeded(generated, node) {
 }
 
 function noEmptySpace() {
-    return (space) ? space : ' ';
+    return space || ' ';
 }
 
 function join(left, right) {
@@ -545,7 +536,8 @@ function join(left, right) {
             esutils.code.isIdentifierPartES5(leftCharCode) && esutils.code.isIdentifierPartES5(rightCharCode) ||
             leftCharCode === 0x2F  /* / */ && rightCharCode === 0x69  /* i */) { // infix word operators all start with `i`
         return [left, noEmptySpace(), right];
-    } else if (esutils.code.isWhiteSpace(leftCharCode) || esutils.code.isLineTerminator(leftCharCode) ||
+    }
+    if (esutils.code.isWhiteSpace(leftCharCode) || esutils.code.isLineTerminator(leftCharCode) ||
                 esutils.code.isWhiteSpace(rightCharCode) || esutils.code.isLineTerminator(rightCharCode)) {
         return [left, right];
     }
@@ -574,15 +566,13 @@ function calculateSpaces(str) {
 }
 
 function adjustMultilineComment(value, specialBase) {
-    let i, len, line, j, spaces, previousBase, sn;
-
     const array = value.split(/\r\n|[\r\n]/);
-    spaces = Number.MAX_VALUE;
+    let spaces = Number.MAX_VALUE;
 
     // first line doesn't have indentation
-    for (i = 1, len = array.length; i < len; ++i) {
-        line = array[i];
-        j = 0;
+    for (let i = 1, len = array.length; i < len; ++i) {
+        const line = array[i];
+        let j = 0;
         while (j < line.length && esutils.code.isWhiteSpace(line.charCodeAt(j))) {
             ++j;
         }
@@ -591,6 +581,7 @@ function adjustMultilineComment(value, specialBase) {
         }
     }
 
+    let previousBase;
     if (typeof specialBase !== 'undefined') {
         // pattern like
         // {
@@ -615,8 +606,8 @@ function adjustMultilineComment(value, specialBase) {
         previousBase = base;
     }
 
-    for (i = 1, len = array.length; i < len; ++i) {
-        sn = toSourceNodeWhenNeeded(addIndent(array[i].slice(spaces)));
+    for (let i = 1, len = array.length; i < len; ++i) {
+        const sn = toSourceNodeWhenNeeded(addIndent(array[i].slice(spaces)));
         array[i] = sourceMap ? sn.join('') : sn;
     }
 
@@ -645,21 +636,18 @@ function generateComment(comment, specialBase) {
 }
 
 function addComments(stmt, result) {
-    let i, len, comment, save, tailingToStatement, specialBase, fragment,
-        extRange, range, prevRange, prefix, infix, suffix, count;
-
     if (stmt.leadingComments && stmt.leadingComments.length > 0) {
-        save = result;
+        const save = result;
 
         if (preserveBlankLines) {
-            [comment] = stmt.leadingComments;
+            const [comment] = stmt.leadingComments;
             result = [];
 
-            extRange = comment.extendedRange;
-            ({ range } = comment);
+            const extRange = comment.extendedRange;
+            let { range } = comment;
 
-            prefix = sourceCode.substring(extRange[0], range[0]);
-            count = (prefix.match(/\n/g) || []).length;
+            const prefix = sourceCode.substring(extRange[0], range[0]);
+            let count = (prefix.match(/\n/g) || []).length;
             if (count > 0) {
                 result.push(stringRepeat('\n', count));
                 result.push(addIndent(generateComment(comment)));
@@ -668,13 +656,13 @@ function addComments(stmt, result) {
                 result.push(generateComment(comment));
             }
 
-            prevRange = range;
+            let prevRange = range;
 
-            for (i = 1, len = stmt.leadingComments.length; i < len; i++) {
-                comment = stmt.leadingComments[i];
+            for (let i = 1, len = stmt.leadingComments.length; i < len; i++) {
+                const comment = stmt.leadingComments[i];
                 ({ range } = comment);
 
-                infix = sourceCode.substring(prevRange[1], range[0]);
+                const infix = sourceCode.substring(prevRange[1], range[0]);
                 count = (infix.match(/\n/g) || []).length;
                 result.push(stringRepeat('\n', count));
                 result.push(addIndent(generateComment(comment)));
@@ -682,11 +670,11 @@ function addComments(stmt, result) {
                 prevRange = range;
             }
 
-            suffix = sourceCode.substring(range[1], extRange[1]);
+            const suffix = sourceCode.substring(range[1], extRange[1]);
             count = (suffix.match(/\n/g) || []).length;
             result.push(stringRepeat('\n', count));
         } else {
-            [comment] = stmt.leadingComments;
+            const [comment] = stmt.leadingComments;
             result = [];
             if (safeConcatenation && stmt.type === Syntax.Program && stmt.body.length === 0) {
                 result.push('\n');
@@ -696,9 +684,9 @@ function addComments(stmt, result) {
                 result.push('\n');
             }
 
-            for (i = 1, len = stmt.leadingComments.length; i < len; ++i) {
-                comment = stmt.leadingComments[i];
-                fragment = [generateComment(comment)];
+            for (let i = 1, len = stmt.leadingComments.length; i < len; ++i) {
+                const comment = stmt.leadingComments[i];
+                const fragment = [generateComment(comment)];
                 if (!endsWithLineTerminator(toSourceNodeWhenNeeded(fragment).toString())) {
                     fragment.push('\n');
                 }
@@ -712,12 +700,12 @@ function addComments(stmt, result) {
     if (stmt.trailingComments) {
 
         if (preserveBlankLines) {
-            [comment] = stmt.trailingComments;
-            extRange = comment.extendedRange;
-            ({ range } = comment);
+            const [comment] = stmt.trailingComments;
+            const extRange = comment.extendedRange;
+            const { range } = comment;
 
-            prefix = sourceCode.substring(extRange[0], range[0]);
-            count = (prefix.match(/\n/g) || []).length;
+            const prefix = sourceCode.substring(extRange[0], range[0]);
+            const count = (prefix.match(/\n/g) || []).length;
 
             if (count > 0) {
                 result.push(stringRepeat('\n', count));
@@ -727,10 +715,10 @@ function addComments(stmt, result) {
                 result.push(generateComment(comment));
             }
         } else {
-            tailingToStatement = !endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString());
-            specialBase = stringRepeat(' ', calculateSpaces(toSourceNodeWhenNeeded([base, result, indent]).toString()));
-            for (i = 0, len = stmt.trailingComments.length; i < len; ++i) {
-                comment = stmt.trailingComments[i];
+            const tailingToStatement = !endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString());
+            const specialBase = stringRepeat(' ', calculateSpaces(toSourceNodeWhenNeeded([base, result, indent]).toString()));
+            for (let i = 0, len = stmt.trailingComments.length; i < len; ++i) {
+                const comment = stmt.trailingComments[i];
                 if (tailingToStatement) {
                     // We assume target like following script
                     //
@@ -758,15 +746,15 @@ function addComments(stmt, result) {
 }
 
 function generateBlankLines(start, end, result) {
-    let j, newlineCount = 0;
+    let newlineCount = 0;
 
-    for (j = start; j < end; j++) {
+    for (let j = start; j < end; j++) {
         if (sourceCode[j] === '\n') {
             newlineCount++;
         }
     }
 
-    for (j = 1; j < newlineCount; j++) {
+    for (let j = 1; j < newlineCount; j++) {
         result.push(newline);
     }
 }
@@ -779,24 +767,23 @@ function parenthesize(text, current, should) {
 }
 
 function generateVerbatimString(string) {
-    let i, iz;
     const result = string.split(/\r\n|\n/);
-    for (i = 1, iz = result.length; i < iz; i++) {
+    for (let i = 1, iz = result.length; i < iz; i++) {
         result[i] = newline + base + result[i];
     }
     return result;
 }
 
 function generateVerbatim(expr, precedence) {
-    let result, prec;
     const verbatim = expr[extra.verbatim];
 
+    let result;
     if (typeof verbatim === 'string') {
         result = parenthesize(generateVerbatimString(verbatim), Precedence.Sequence, precedence);
     } else {
         // verbatim is object
         result = generateVerbatimString(verbatim.content);
-        prec = (verbatim.precedence != null) ? verbatim.precedence : Precedence.Sequence;
+        const prec = (verbatim.precedence != null) ? verbatim.precedence : Precedence.Sequence;
         result = parenthesize(result, prec, precedence);
     }
 
@@ -817,9 +804,9 @@ function generateStarSuffix(node) {
 }
 
 function generateMethodPrefix(prop) {
-    let prefix = '';
-
     const func = prop.value;
+
+    let prefix = '';
     if (func.async) {
         prefix += generateAsyncPrefix(func, !prop.computed);
     }
@@ -835,9 +822,6 @@ class CodeGenerator {
     // Helpers.
 
     maybeBlock (stmt, flags) {
-        let result;
-        const that = this;
-
         const noLeadingComment = !extra.comment || !stmt.leadingComments;
 
         if (stmt.type === Syntax.BlockStatement && noLeadingComment) {
@@ -848,6 +832,8 @@ class CodeGenerator {
             return ';';
         }
 
+        const that = this;
+        let result;
         withIndent(function () {
             result = [
                 newline,
@@ -877,10 +863,7 @@ class CodeGenerator {
     }
 
     generateFunctionParams (node) {
-        let i, iz, result, hasDefault;
-
-        hasDefault = false;
-
+        let result;
         if (node.type === Syntax.ArrowFunctionExpression &&
                     !node.rest && (!node.defaults || node.defaults.length === 0) &&
                     node.params.length === 1 && node.params[0].type === Syntax.Identifier) {
@@ -889,10 +872,12 @@ class CodeGenerator {
         } else {
             result = node.type === Syntax.ArrowFunctionExpression ? [generateAsyncPrefix(node, false)] : [];
             result.push('(');
+
+            let hasDefault = false;
             if (node.defaults) {
                 hasDefault = true;
             }
-            for (i = 0, iz = node.params.length; i < iz; ++i) {
+            for (let i = 0, iz = node.params.length; i < iz; ++i) {
                 if (hasDefault && node.defaults[i]) {
                     // Handle default values.
                     result.push(this.generateAssignment(node.params[i], node.defaults[i], '=', Precedence.Assignment, E_TTT));
@@ -919,8 +904,6 @@ class CodeGenerator {
     }
 
     generateFunctionBody (node) {
-        let expr;
-
         const result = this.generateFunctionParams(node);
 
         if (node.type === Syntax.ArrowFunctionExpression) {
@@ -930,7 +913,7 @@ class CodeGenerator {
 
         if (node.expression) {
             result.push(space);
-            expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT);
+            let expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT);
             if (expr.toString().charAt(0) === '{') {
                 expr = ['(', expr, ')'];
             }
@@ -943,8 +926,8 @@ class CodeGenerator {
     }
 
     generateIterationForStatement (operator, stmt, flags) {
-        let result = [`for${stmt.await ? `${noEmptySpace()}await` : ''}${space}(`];
         const that = this;
+        let result = [`for${stmt.await ? `${noEmptySpace()}await` : ''}${space}(`];
         withIndent(function () {
             if (stmt.left.type === Syntax.VariableDeclaration) {
                 withIndent(function () {
@@ -1005,27 +988,22 @@ class CodeGenerator {
     }
 
     generateExpression (expr, precedence, flags) {
-        let result;
-
         const type = expr.type || Syntax.Property;
 
         if (extra.verbatim && Object.prototype.hasOwnProperty.call(expr, extra.verbatim)) {
             return generateVerbatim(expr, precedence);
         }
 
-        result = this[type](expr, precedence, flags);
-
-
+        let result = this[type](expr, precedence, flags);
         if (extra.comment) {
             result = addComments(expr, result);
         }
+
         return toSourceNodeWhenNeeded(result, expr);
     }
 
     generateStatement (stmt, flags) {
-        let result;
-
-        result = this[stmt.type](stmt, flags);
+        let result = this[stmt.type](stmt, flags);
 
         // Attach comments
 
@@ -1047,15 +1025,15 @@ class CodeGenerator {
 CodeGenerator.Statement = {
 
     BlockStatement (stmt, flags) {
-        let range, content, result = ['{', newline];
         const that = this;
+        let result = ['{', newline];
 
         withIndent(function () {
             // handle functions without any code
             if (stmt.body.length === 0 && preserveBlankLines) {
-                ({ range } = stmt);
+                const { range } = stmt;
                 if (range[1] - range[0] > 2) {
-                    content = sourceCode.substring(range[0] + 1, range[1] - 1);
+                    const content = sourceCode.substring(range[0] + 1, range[1] - 1);
                     if (content[0] === '\n') {
                         result = ['{'];
                     }
@@ -1063,19 +1041,18 @@ CodeGenerator.Statement = {
                 }
             }
 
-            let i, iz, fragment, bodyFlags;
-            bodyFlags = S_TFFF;
+            let bodyFlags = S_TFFF;
             if (flags & F_FUNC_BODY) {
                 bodyFlags |= F_DIRECTIVE_CTX;
             }
 
-            for (i = 0, iz = stmt.body.length; i < iz; ++i) {
+            for (let i = 0, iz = stmt.body.length; i < iz; ++i) {
                 if (preserveBlankLines) {
                     // handle spaces before the first line
                     if (i === 0) {
                         if (stmt.body[0].leadingComments) {
-                            range = stmt.body[0].leadingComments[0].extendedRange;
-                            content = sourceCode.substring(range[0], range[1]);
+                            const range = stmt.body[0].leadingComments[0].extendedRange;
+                            const content = sourceCode.substring(range[0], range[1]);
                             if (content[0] === '\n') {
                                 result = ['{'];
                             }
@@ -1097,6 +1074,7 @@ CodeGenerator.Statement = {
                     bodyFlags |= F_SEMICOLON_OPT;
                 }
 
+                let fragment;
                 if (stmt.body[i].leadingComments && preserveBlankLines) {
                     fragment = that.generateStatement(stmt.body[i], bodyFlags);
                 } else {
@@ -1149,9 +1127,7 @@ CodeGenerator.Statement = {
         const result = [ '{', newline], that = this;
 
         withIndent(function (indent) {
-            let i, iz;
-
-            for (i = 0, iz = stmt.body.length; i < iz; ++i) {
+            for (let i = 0, iz = stmt.body.length; i < iz; ++i) {
                 result.push(indent);
                 result.push(that.generateExpression(stmt.body[i], Precedence.Sequence, E_TTT));
                 if (i + 1 < iz) {
@@ -1169,13 +1145,12 @@ CodeGenerator.Statement = {
     },
 
     ClassDeclaration (stmt, flags) {
-        let result, fragment;
-        result  = ['class'];
+        let result  = ['class'];
         if (stmt.id) {
             result = join(result, this.generateExpression(stmt.id, Precedence.Sequence, E_TTT));
         }
         if (stmt.superClass) {
-            fragment = join('extends', this.generateExpression(stmt.superClass, Precedence.Unary, E_TTT));
+            const fragment = join('extends', this.generateExpression(stmt.superClass, Precedence.Unary, E_TTT));
             result = join(result, fragment);
         }
         result.push(space);
@@ -1202,8 +1177,8 @@ CodeGenerator.Statement = {
     },
 
     CatchClause (stmt, flags) {
-        let result;
         const that = this;
+        let result;
         withIndent(function () {
             let guard;
 
@@ -1235,9 +1210,9 @@ CodeGenerator.Statement = {
     },
 
     ExportDefaultDeclaration (stmt, flags) {
-        let result = [ 'export' ];
-
         const bodyFlags = (flags & F_SEMICOLON_OPT) ? S_TFFT : S_TFFF;
+
+        let result = [ 'export' ];
 
         // export default HoistableDeclaration[Default]
         // export default AssignmentExpression[In] ;
@@ -1251,10 +1226,11 @@ CodeGenerator.Statement = {
     },
 
     ExportNamedDeclaration (stmt, flags) {
-        let result = [ 'export' ];
         const that = this;
 
         const bodyFlags = (flags & F_SEMICOLON_OPT) ? S_TFFT : S_TFFF;
+
+        let result = [ 'export' ];
 
         // export VariableStatement
         // export Declaration[Default]
@@ -1272,9 +1248,8 @@ CodeGenerator.Statement = {
             } else {
                 result = join(result, '{');
                 withIndent(function (indent) {
-                    let i, iz;
                     result.push(newline);
-                    for (i = 0, iz = stmt.specifiers.length; i < iz; ++i) {
+                    for (let i = 0, iz = stmt.specifiers.length; i < iz; ++i) {
                         result.push(indent);
                         result.push(that.generateExpression(stmt.specifiers[i], Precedence.Sequence, E_TTT));
                         if (i + 1 < iz) {
@@ -1315,8 +1290,6 @@ CodeGenerator.Statement = {
     },
 
     ExpressionStatement (stmt, flags) {
-        let result;
-
         function isClassPrefixed(fragment) {
             if (fragment.slice(0, 5) !== 'class') {
                 return false;
@@ -1334,13 +1307,13 @@ CodeGenerator.Statement = {
         }
 
         function isAsyncPrefixed(fragment) {
-            let i, iz;
             if (fragment.slice(0, 5) !== 'async') {
                 return false;
             }
             if (!esutils.code.isWhiteSpace(fragment.charCodeAt(5))) {
                 return false;
             }
+            let i, iz;
             for (i = 6, iz = fragment.length; i < iz; ++i) {
                 if (!esutils.code.isWhiteSpace(fragment.charCodeAt(i))) {
                     break;
@@ -1356,7 +1329,7 @@ CodeGenerator.Statement = {
             return code === 0x28 /* '(' */ || esutils.code.isWhiteSpace(code) || code === 0x2A  /* '*' */ || esutils.code.isLineTerminator(code);
         }
 
-        result = [this.generateExpression(stmt.expression, Precedence.Sequence, E_TTT)];
+        let result = [this.generateExpression(stmt.expression, Precedence.Sequence, E_TTT)];
         // 12.4 '{', 'function', 'class' is not allowed in this position.
         // wrap expression with parentheses
         const fragment = toSourceNodeWhenNeeded(result).toString();
@@ -1376,7 +1349,6 @@ CodeGenerator.Statement = {
         // ES6: 15.2.1 valid import declarations:
         //     - import ImportClause FromClause ;
         //     - import ModuleSpecifier ;
-        let result, cursor;
         const that = this;
 
         // If no ImportClause is present,
@@ -1394,10 +1366,10 @@ CodeGenerator.Statement = {
         }
 
         // import ImportClause FromClause ;
-        result = [
+        let result = [
             'import'
         ];
-        cursor = 0;
+        let cursor = 0;
 
         // ImportedBinding
         if (stmt.specifiers[cursor].type === Syntax.ImportDefaultSpecifier) {
@@ -1433,9 +1405,8 @@ CodeGenerator.Statement = {
                     //    ...,
                     // } from "...";
                     withIndent(function (indent) {
-                        let i, iz;
                         result.push(newline);
-                        for (i = cursor, iz = stmt.specifiers.length; i < iz; ++i) {
+                        for (let i = cursor, iz = stmt.specifiers.length; i < iz; ++i) {
                             result.push(indent);
                             result.push(that.generateExpression(stmt.specifiers[i], Precedence.Sequence, E_TTT));
                             if (i + 1 < iz) {
@@ -1478,7 +1449,6 @@ CodeGenerator.Statement = {
         // VariableDeclarator is typed as Statement,
         // but joined with comma (not LineTerminator).
         // So if comment is attached to target node, we should specialize.
-        let i, iz, node;
         const that = this;
 
         const result = [ stmt.kind ];
@@ -1486,7 +1456,7 @@ CodeGenerator.Statement = {
         const bodyFlags = (flags & F_ALLOW_IN) ? S_TFFF : S_FFFF;
 
         function block() {
-            [node] = stmt.declarations;
+            const [node] = stmt.declarations;
             if (extra.comment && node.leadingComments) {
                 result.push('\n');
                 result.push(addIndent(that.generateStatement(node, bodyFlags)));
@@ -1495,8 +1465,8 @@ CodeGenerator.Statement = {
                 result.push(that.generateStatement(node, bodyFlags));
             }
 
-            for (i = 1, iz = stmt.declarations.length; i < iz; ++i) {
-                node = stmt.declarations[i];
+            for (let i = 1, iz = stmt.declarations.length; i < iz; ++i) {
+                const node = stmt.declarations[i];
                 if (extra.comment && node.leadingComments) {
                     result.push(`,${newline}`);
                     result.push(addIndent(that.generateStatement(node, bodyFlags)));
@@ -1526,23 +1496,21 @@ CodeGenerator.Statement = {
     },
 
     TryStatement (stmt, flags) {
-        let result, i, iz, guardedHandlers;
-
-        result = ['try', this.maybeBlock(stmt.block, S_TFFF)];
+        let result = ['try', this.maybeBlock(stmt.block, S_TFFF)];
         result = this.maybeBlockSuffix(stmt.block, result);
 
         if (stmt.handlers) {
             // old interface
-            for (i = 0, iz = stmt.handlers.length; i < iz; ++i) {
+            for (let i = 0, iz = stmt.handlers.length; i < iz; ++i) {
                 result = join(result, this.generateStatement(stmt.handlers[i], S_TFFF));
                 if (stmt.finalizer || i + 1 !== iz) {
                     result = this.maybeBlockSuffix(stmt.handlers[i].body, result);
                 }
             }
         } else {
-            guardedHandlers = stmt.guardedHandlers || [];
+            const guardedHandlers = stmt.guardedHandlers || [];
 
-            for (i = 0, iz = guardedHandlers.length; i < iz; ++i) {
+            for (let i = 0, iz = guardedHandlers.length; i < iz; ++i) {
                 result = join(result, this.generateStatement(guardedHandlers[i], S_TFFF));
                 if (stmt.finalizer || i + 1 !== iz) {
                     result = this.maybeBlockSuffix(guardedHandlers[i].body, result);
@@ -1552,7 +1520,7 @@ CodeGenerator.Statement = {
             // new interface
             if (stmt.handler) {
                 if (Array.isArray(stmt.handler)) {
-                    for (i = 0, iz = stmt.handler.length; i < iz; ++i) {
+                    for (let i = 0, iz = stmt.handler.length; i < iz; ++i) {
                         result = join(result, this.generateStatement(stmt.handler[i], S_TFFF));
                         if (stmt.finalizer || i + 1 !== iz) {
                             result = this.maybeBlockSuffix(stmt.handler[i].body, result);
@@ -1573,8 +1541,8 @@ CodeGenerator.Statement = {
     },
 
     SwitchStatement (stmt, flags) {
-        let result, fragment, i, iz, bodyFlags;
         const that = this;
+        let result;
         withIndent(function () {
             result = [
                 `switch${space}(`,
@@ -1583,12 +1551,12 @@ CodeGenerator.Statement = {
             ];
         });
         if (stmt.cases) {
-            bodyFlags = S_TFFF;
-            for (i = 0, iz = stmt.cases.length; i < iz; ++i) {
+            let bodyFlags = S_TFFF;
+            for (let i = 0, iz = stmt.cases.length; i < iz; ++i) {
                 if (i === iz - 1) {
                     bodyFlags |= F_SEMICOLON_OPT;
                 }
-                fragment = addIndent(this.generateStatement(stmt.cases[i], bodyFlags));
+                const fragment = addIndent(this.generateStatement(stmt.cases[i], bodyFlags));
                 result.push(fragment);
                 if (!endsWithLineTerminator(toSourceNodeWhenNeeded(fragment).toString())) {
                     result.push(newline);
@@ -1600,8 +1568,8 @@ CodeGenerator.Statement = {
     },
 
     SwitchCase (stmt, flags) {
-        let result, fragment, i, iz, bodyFlags;
         const that = this;
+        let result;
         withIndent(function () {
             if (stmt.test) {
                 result = [
@@ -1612,10 +1580,10 @@ CodeGenerator.Statement = {
                 result = ['default:'];
             }
 
-            i = 0;
-            iz = stmt.consequent.length;
+            let i = 0;
+            const iz = stmt.consequent.length;
             if (iz && stmt.consequent[0].type === Syntax.BlockStatement) {
-                fragment = that.maybeBlock(stmt.consequent[0], S_TFFF);
+                const fragment = that.maybeBlock(stmt.consequent[0], S_TFFF);
                 result.push(fragment);
                 i = 1;
             }
@@ -1624,12 +1592,12 @@ CodeGenerator.Statement = {
                 result.push(newline);
             }
 
-            bodyFlags = S_TFFF;
+            let bodyFlags = S_TFFF;
             for (; i < iz; ++i) {
                 if (i === iz - 1 && flags & F_SEMICOLON_OPT) {
                     bodyFlags |= F_SEMICOLON_OPT;
                 }
-                fragment = addIndent(that.generateStatement(stmt.consequent[i], bodyFlags));
+                const fragment = addIndent(that.generateStatement(stmt.consequent[i], bodyFlags));
                 result.push(fragment);
                 if (i + 1 !== iz && !endsWithLineTerminator(toSourceNodeWhenNeeded(fragment).toString())) {
                     result.push(newline);
@@ -1640,8 +1608,8 @@ CodeGenerator.Statement = {
     },
 
     IfStatement (stmt, flags) {
-        let result, bodyFlags;
         const that = this;
+        let result;
         withIndent(function () {
             result = [
                 `if${space}(`,
@@ -1650,7 +1618,7 @@ CodeGenerator.Statement = {
             ];
         });
         const semicolonOptional = flags & F_SEMICOLON_OPT;
-        bodyFlags = S_TFFF;
+        let bodyFlags = S_TFFF;
         if (semicolonOptional) {
             bodyFlags |= F_SEMICOLON_OPT;
         }
@@ -1669,8 +1637,8 @@ CodeGenerator.Statement = {
     },
 
     ForStatement (stmt, flags) {
-        let result;
         const that = this;
+        let result;
         withIndent(function () {
             result = [`for${space}(`];
             if (stmt.init) {
@@ -1719,11 +1687,10 @@ CodeGenerator.Statement = {
     },
 
     Program (stmt, flags) {
-        let fragment, i, bodyFlags;
         const iz = stmt.body.length;
         const result = [safeConcatenation && iz > 0 ? '\n' : ''];
-        bodyFlags = S_TFTF;
-        for (i = 0; i < iz; ++i) {
+        let bodyFlags = S_TFTF;
+        for (let i = 0; i < iz; ++i) {
             if (!safeConcatenation && i === iz - 1) {
                 bodyFlags |= F_SEMICOLON_OPT;
             }
@@ -1744,7 +1711,7 @@ CodeGenerator.Statement = {
                 }
             }
 
-            fragment = addIndent(this.generateStatement(stmt.body[i], bodyFlags));
+            const fragment = addIndent(this.generateStatement(stmt.body[i], bodyFlags));
             result.push(fragment);
             if (i + 1 < iz && !endsWithLineTerminator(toSourceNodeWhenNeeded(fragment).toString())) {
                 if (preserveBlankLines) {
@@ -1789,8 +1756,8 @@ CodeGenerator.Statement = {
     },
 
     WhileStatement (stmt, flags) {
-        let result;
         const that = this;
+        let result;
         withIndent(function () {
             result = [
                 `while${space}(`,
@@ -1803,8 +1770,8 @@ CodeGenerator.Statement = {
     },
 
     WithStatement (stmt, flags) {
-        let result;
         const that = this;
+        let result;
         withIndent(function () {
             result = [
                 `with${space}(`,
@@ -1824,12 +1791,11 @@ merge(CodeGenerator.prototype, CodeGenerator.Statement);
 CodeGenerator.Expression = {
 
     SequenceExpression (expr, precedence, flags) {
-        let i, iz;
         if (Precedence.Sequence < precedence) {
             flags |= F_ALLOW_IN;
         }
         const result = [];
-        for (i = 0, iz = expr.expressions.length; i < iz; ++i) {
+        for (let i = 0, iz = expr.expressions.length; i < iz; ++i) {
             result.push(this.generateExpression(expr.expressions[i], Precedence.Assignment, flags));
             if (i + 1 < iz) {
                 result.push(`,${space}`);
@@ -1871,7 +1837,6 @@ CodeGenerator.Expression = {
     },
 
     BinaryExpression (expr, precedence, flags) {
-        let result, fragment;
         const currentPrecedence = BinaryPrecedence[expr.operator];
         const leftPrecedence = expr.operator === '**' ? Precedence.Postfix : currentPrecedence;
         const rightPrecedence = expr.operator === '**' ? currentPrecedence : currentPrecedence + 1;
@@ -1880,10 +1845,11 @@ CodeGenerator.Expression = {
             flags |= F_ALLOW_IN;
         }
 
-        fragment = this.generateExpression(expr.left, leftPrecedence, flags);
+        let fragment = this.generateExpression(expr.left, leftPrecedence, flags);
 
         const leftSource = fragment.toString();
 
+        let result;
         if (leftSource.charCodeAt(leftSource.length - 1) === 0x2F /* / */ && esutils.code.isIdentifierPartES5(expr.operator.charCodeAt(0))) {
             result = [fragment, noEmptySpace(), expr.operator];
         } else {
@@ -1911,8 +1877,6 @@ CodeGenerator.Expression = {
     },
 
     CallExpression (expr, precedence, flags) {
-        let i, iz;
-
         // F_ALLOW_UNPARATH_NEW becomes false.
         const result = [this.generateExpression(expr.callee, Precedence.Call, E_TTF)];
 
@@ -1921,7 +1885,7 @@ CodeGenerator.Expression = {
         }
 
         result.push('(');
-        for (i = 0, iz = expr['arguments'].length; i < iz; ++i) {
+        for (let i = 0, iz = expr['arguments'].length; i < iz; ++i) {
             result.push(this.generateExpression(expr['arguments'][i], Precedence.Assignment, E_TTT));
             if (i + 1 < iz) {
                 result.push(`,${space}`);
@@ -1947,7 +1911,6 @@ CodeGenerator.Expression = {
     },
 
     NewExpression (expr, precedence, flags) {
-        let i, iz;
         const { length } = expr['arguments'];
 
         // F_ALLOW_CALL becomes false.
@@ -1961,7 +1924,7 @@ CodeGenerator.Expression = {
 
         if (!(flags & F_ALLOW_UNPARATH_NEW) || parentheses || length > 0) {
             result.push('(');
-            for (i = 0, iz = length; i < iz; ++i) {
+            for (let i = 0, iz = length; i < iz; ++i) {
                 result.push(this.generateExpression(expr['arguments'][i], Precedence.Assignment, E_TTT));
                 if (i + 1 < iz) {
                     result.push(`,${space}`);
@@ -1974,8 +1937,6 @@ CodeGenerator.Expression = {
     },
 
     MemberExpression (expr, precedence, flags) {
-        let fragment;
-
         // F_ALLOW_UNPARATH_NEW becomes false.
         const result = [this.generateExpression(expr.object, Precedence.Call, (flags & F_ALLOW_CALL) ? E_TTF : E_TFF)];
 
@@ -1989,7 +1950,7 @@ CodeGenerator.Expression = {
             result.push(']');
         } else {
             if (!expr.optional && expr.object.type === Syntax.Literal && typeof expr.object.value === 'number') {
-                fragment = toSourceNodeWhenNeeded(result).toString();
+                const fragment = toSourceNodeWhenNeeded(result).toString();
                 // When the following conditions are all true,
                 //   1. No floating point
                 //   2. Don't have exponents
@@ -2021,9 +1982,9 @@ CodeGenerator.Expression = {
     },
 
     UnaryExpression (expr, precedence, flags) {
-        let result, rightCharCode, leftSource, leftCharCode;
         const fragment = this.generateExpression(expr.argument, Precedence.Unary, E_TTT);
 
+        let result;
         if (space === '') {
             result = join(expr.operator, fragment);
         } else {
@@ -2035,9 +1996,9 @@ CodeGenerator.Expression = {
             } else {
                 // Prevent inserting spaces between operator and argument if it is unnecessary
                 // like, `!cond`
-                leftSource = toSourceNodeWhenNeeded(result).toString();
-                leftCharCode = leftSource.charCodeAt(leftSource.length - 1);
-                rightCharCode = fragment.toString().charCodeAt(0);
+                const leftSource = toSourceNodeWhenNeeded(result).toString();
+                const leftCharCode = leftSource.charCodeAt(leftSource.length - 1);
+                const rightCharCode = fragment.toString().charCodeAt(0);
 
                 if (((leftCharCode === 0x2B  /* + */ || leftCharCode === 0x2D  /* - */) && leftCharCode === rightCharCode) ||
                             (esutils.code.isIdentifierPartES5(leftCharCode) && esutils.code.isIdentifierPartES5(rightCharCode))) {
@@ -2116,15 +2077,14 @@ CodeGenerator.Expression = {
     },
 
     ArrayExpression (expr, precedence, flags, isPattern) {
-        const that = this;
         if (!expr.elements.length) {
             return '[]';
         }
         const multiline = isPattern ? false : expr.elements.length > 1;
         const result = ['[', multiline ? newline : ''];
+        const that = this;
         withIndent(function (indent) {
-            let i, iz;
-            for (i = 0, iz = expr.elements.length; i < iz; ++i) {
+            for (let i = 0, iz = expr.elements.length; i < iz; ++i) {
                 if (!expr.elements[i]) {
                     if (multiline) {
                         result.push(indent);
@@ -2154,13 +2114,12 @@ CodeGenerator.Expression = {
     },
 
     ClassExpression (expr, precedence, flags) {
-        let result, fragment;
-        result = ['class'];
+        let result = ['class'];
         if (expr.id) {
             result = join(result, this.generateExpression(expr.id, Precedence.Sequence, E_TTT));
         }
         if (expr.superClass) {
-            fragment = join('extends', this.generateExpression(expr.superClass, Precedence.Unary, E_TTT));
+            const fragment = join('extends', this.generateExpression(expr.superClass, Precedence.Unary, E_TTT));
             result = join(result, fragment);
         }
         result.push(space);
@@ -2169,12 +2128,14 @@ CodeGenerator.Expression = {
     },
 
     MethodDefinition (expr, precedence, flags) {
-        let result, fragment;
+        let result;
         if (expr['static']) {
             result = [`static${space}`];
         } else {
             result = [];
         }
+
+        let fragment;
         if (expr.kind === 'get' || expr.kind === 'set') {
             fragment = [
                 join(expr.kind, this.generatePropertyKey(expr.key, expr.computed)),
@@ -2222,14 +2183,13 @@ CodeGenerator.Expression = {
     },
 
     ObjectExpression (expr, precedence, flags) {
-        let result, fragment;
-        const that = this;
-
         if (!expr.properties.length) {
             return '{}';
         }
         const multiline = expr.properties.length > 1;
 
+        const that = this;
+        let fragment;
         withIndent(function () {
             fragment = that.generateExpression(expr.properties[0], Precedence.Sequence, E_TTT);
         });
@@ -2248,13 +2208,13 @@ CodeGenerator.Expression = {
             }
         }
 
+        let result;
         withIndent(function (indent) {
-            let i, iz;
             result = [ '{', newline, indent, fragment ];
 
             if (multiline) {
                 result.push(`,${newline}`);
-                for (i = 1, iz = expr.properties.length; i < iz; ++i) {
+                for (let i = 1, iz = expr.properties.length; i < iz; ++i) {
                     result.push(indent);
                     result.push(that.generateExpression(expr.properties[i], Precedence.Sequence, E_TTT));
                     if (i + 1 < iz) {
@@ -2277,15 +2237,13 @@ CodeGenerator.Expression = {
     },
 
     ObjectPattern (expr, precedence, flags) {
-        let i, iz, multiline, property;
-        const that = this;
         if (!expr.properties.length) {
             return '{}';
         }
 
-        multiline = false;
+        let multiline = false;
         if (expr.properties.length === 1) {
-            [property] = expr.properties;
+            const [property] = expr.properties;
             if (
                 property.type === Syntax.Property
                     && property.value.type !== Syntax.Identifier
@@ -2293,8 +2251,8 @@ CodeGenerator.Expression = {
                 multiline = true;
             }
         } else {
-            for (i = 0, iz = expr.properties.length; i < iz; ++i) {
-                property = expr.properties[i];
+            for (let i = 0, iz = expr.properties.length; i < iz; ++i) {
+                const property = expr.properties[i];
                 if (
                     property.type === Syntax.Property
                         && !property.shorthand
@@ -2306,9 +2264,9 @@ CodeGenerator.Expression = {
         }
         const result = ['{', multiline ? newline : '' ];
 
+        const that = this;
         withIndent(function (indent) {
-            let i, iz;
-            for (i = 0, iz = expr.properties.length; i < iz; ++i) {
+            for (let i = 0, iz = expr.properties.length; i < iz; ++i) {
                 result.push(multiline ? indent : '');
                 result.push(that.generateExpression(expr.properties[i], Precedence.Sequence, E_TTT));
                 if (i + 1 < iz) {
@@ -2426,19 +2384,18 @@ CodeGenerator.Expression = {
         // GeneratorExpression should be parenthesized with (...), ComprehensionExpression with [...]
         // Due to https://bugzilla.mozilla.org/show_bug.cgi?id=883468 position of expr.body can differ in Spidermonkey and ES6
 
-        let result, i, iz, fragment;
-        const that = this;
-        result = (expr.type === Syntax.GeneratorExpression) ? ['('] : ['['];
+        let result = (expr.type === Syntax.GeneratorExpression) ? ['('] : ['['];
 
         if (extra.moz.comprehensionExpressionStartsWithAssignment) {
-            fragment = this.generateExpression(expr.body, Precedence.Assignment, E_TTT);
+            const fragment = this.generateExpression(expr.body, Precedence.Assignment, E_TTT);
             result.push(fragment);
         }
 
         if (expr.blocks) {
+            const that = this;
             withIndent(function () {
-                for (i = 0, iz = expr.blocks.length; i < iz; ++i) {
-                    fragment = that.generateExpression(expr.blocks[i], Precedence.Sequence, E_TTT);
+                for (let i = 0, iz = expr.blocks.length; i < iz; ++i) {
+                    const fragment = that.generateExpression(expr.blocks[i], Precedence.Sequence, E_TTT);
                     if (i > 0 || extra.moz.comprehensionExpressionStartsWithAssignment) {
                         result = join(result, fragment);
                     } else {
@@ -2450,12 +2407,12 @@ CodeGenerator.Expression = {
 
         if (expr.filter) {
             result = join(result, `if${space}`);
-            fragment = this.generateExpression(expr.filter, Precedence.Sequence, E_TTT);
+            const fragment = this.generateExpression(expr.filter, Precedence.Sequence, E_TTT);
             result = join(result, [ '(', fragment, ')' ]);
         }
 
         if (!extra.moz.comprehensionExpressionStartsWithAssignment) {
-            fragment = this.generateExpression(expr.body, Precedence.Assignment, E_TTT);
+            const fragment = this.generateExpression(expr.body, Precedence.Assignment, E_TTT);
 
             result = join(result, fragment);
         }
@@ -2507,9 +2464,8 @@ CodeGenerator.Expression = {
     },
 
     TemplateLiteral (expr, precedence, flags) {
-        let i, iz;
         const result = [ '`' ];
-        for (i = 0, iz = expr.quasis.length; i < iz; ++i) {
+        for (let i = 0, iz = expr.quasis.length; i < iz; ++i) {
             result.push(this.generateExpression(expr.quasis[i], Precedence.Primary, E_TTT));
             if (i + 1 < iz) {
                 result.push(`\${${space}`);
@@ -2551,7 +2507,6 @@ function generateInternal(node) {
 
 function generate(node, options) {
     const defaultOptions = getDefaultOptions();
-    let pair;
 
     if (options != null) {
         // Obsolete options
@@ -2598,6 +2553,7 @@ function generate(node, options) {
 
     const result = generateInternal(node);
 
+    let pair;
     if (!sourceMap) {
         pair = { code: result.toString(), map: null };
         return options.sourceMapWithCode ? pair : pair.code;
