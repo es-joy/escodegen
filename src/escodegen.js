@@ -223,10 +223,8 @@ function endsWithLineTerminator(str) {
 }
 
 function merge(target, override) {
-    for (const key in override) {
-        if (Object.prototype.hasOwnProperty.call(override, key)) {
-            target[key] = override[key];
-        }
+    for (const [key, val] of Object.entries(override)) {
+        target[key] = val;
     }
     return target;
 }
@@ -236,18 +234,15 @@ function updateDeeply(target, override) {
         return typeof target === 'object' && target instanceof Object && !(target instanceof RegExp);
     }
 
-    for (const key in override) {
-        if (Object.prototype.hasOwnProperty.call(override, key)) {
-            const val = override[key];
-            if (isHashObject(val)) {
-                if (isHashObject(target[key])) {
-                    updateDeeply(target[key], val);
-                } else {
-                    target[key] = updateDeeply({}, val);
-                }
+    for (const [key, val] of Object.entries(override)) {
+        if (isHashObject(val)) {
+            if (isHashObject(target[key])) {
+                updateDeeply(target[key], val);
             } else {
-                target[key] = val;
+                target[key] = updateDeeply({}, val);
             }
+        } else {
+            target[key] = val;
         }
     }
     return target;
