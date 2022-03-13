@@ -5,8 +5,9 @@ import old from './old.cjs';
 import asts from './asts.js';
 
 function cycle(codegen) {
-    for (let i = 0; i < asts.length; i++)
-        codegen.generate(asts[i]);
+    for (const ast of asts) {
+        codegen.generate(ast);
+    }
 }
 
 new Benchmark.Suite()

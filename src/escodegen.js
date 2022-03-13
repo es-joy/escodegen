@@ -477,8 +477,7 @@ function escapeString(str) {
      */
 function flattenToString(arr) {
     let result = '';
-    for (let i = 0, iz = arr.length; i < iz; ++i) {
-        const elem = arr[i];
+    for (const elem of arr) {
         result += Array.isArray(elem) ? flattenToString(elem) : elem;
     }
     return result;
@@ -2246,8 +2245,7 @@ CodeGenerator.Expression = {
                 multiline = true;
             }
         } else {
-            for (let i = 0, iz = expr.properties.length; i < iz; ++i) {
-                const property = expr.properties[i];
+            for (const property of expr.properties) {
                 if (
                     property.type === Syntax.Property
                         && !property.shorthand
