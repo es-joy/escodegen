@@ -51,18 +51,18 @@ function test(code, expected) {
                 adjustMultilineComment: true
             }
         }
-    }).replace(/[\n\r]$/, '')  }\n`;
+    }).replace(/[\n\r]$/, '')}\n`;
     expect(actual).to.be.equal(expected);
 }
 
 describe('comment test', function () {
-    fs.readdirSync(`${__dirname  }/comment`).sort().forEach(function(file) {
+    fs.readdirSync(`${__dirname}/comment`).sort().forEach(function(file) {
         let code, expected, p;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file)) {
             it(file, function () {
                 p = file.replace(/\.js$/, '.expected.js');
-                code = fs.readFileSync(`${__dirname  }/comment/${  file}`, 'utf-8');
-                expected = fs.readFileSync(`${__dirname  }/comment/${  p}`, 'utf-8');
+                code = fs.readFileSync(`${__dirname}/comment/${file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname}/comment/${p}`, 'utf-8');
                 test(code, expected);
             });
         }

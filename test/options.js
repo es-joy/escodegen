@@ -988,7 +988,7 @@ function runTest(options, source, expectedCode) {
 
 describe('options test', function () {
     data.forEach(function (category, index) {
-        it(`data[${  index  }]`, function () {
+        it(`data[${index}]`, function () {
             const { options } = category;
             Object.keys(category.items).forEach(function (source) {
                 const expectedCode = category.items[source];

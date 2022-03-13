@@ -41,18 +41,18 @@ function test(code, expected) {
     const tree = esprima.parse(code, options);
 
     // for UNIX text comment
-    const actual = `${escodegen.generate(tree).replace(/[\n\r]$/, '')  }\n`;
+    const actual = `${escodegen.generate(tree).replace(/[\n\r]$/, '')}\n`;
     expect(actual).to.be.equal(expected);
 }
 
 describe('compare test', function () {
-    fs.readdirSync(`${__dirname  }/compare`).sort().forEach(function(file) {
+    fs.readdirSync(`${__dirname}/compare`).sort().forEach(function(file) {
         let code, expected, p;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file)) {
             it(file, function () {
                 p = file.replace(/\.js$/, '.expected.js');
-                code = fs.readFileSync(`${__dirname  }/compare/${  file}`, 'utf-8');
-                expected = fs.readFileSync(`${__dirname  }/compare/${  p}`, 'utf-8');
+                code = fs.readFileSync(`${__dirname}/compare/${file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname}/compare/${p}`, 'utf-8');
                 test(code, expected);
             });
         }

@@ -41,7 +41,7 @@ function test(code, expected) {
     const tree = esprima.parse(code, options);
 
     // for UNIX text comment
-    const actual = `${escodegen.generate(tree).replace(/[\n\r]$/, '')  }\n`;
+    const actual = `${escodegen.generate(tree).replace(/[\n\r]$/, '')}\n`;
     expect(actual).to.be.equal(expected);
 }
 
@@ -59,7 +59,7 @@ function testMin(code, expected) {
     const actual = `${escodegen.generate(tree, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
-    }).replace(/[\n\r]$/, '')  }\n`;
+    }).replace(/[\n\r]$/, '')}\n`;
     expect(actual).to.be.equal(expected);
 
     // And ensure that minified value is exactly equal.
@@ -67,24 +67,24 @@ function testMin(code, expected) {
     const actual2 = `${escodegen.generate(tree2, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
-    }).replace(/[\n\r]$/, '')  }\n`;
+    }).replace(/[\n\r]$/, '')}\n`;
     expect(actual2).to.be.equal(actual);
 }
 
 const DIR = 'compare-harmony';
 
 describe('compare harmony test', function () {
-    fs.readdirSync(`${__dirname  }/${  DIR}`).sort().forEach(function(file) {
+    fs.readdirSync(`${__dirname}/${DIR}`).sort().forEach(function(file) {
         let code, expected, exp, min;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file) && !/expected\.min\.js$/.test(file)) {
             it(file, function () {
                 exp = file.replace(/\.js$/, '.expected.js');
                 min = file.replace(/\.js$/, '.expected.min.js');
-                code = fs.readFileSync(`${__dirname  }/${  DIR  }/${  file}`, 'utf-8');
-                expected = fs.readFileSync(`${__dirname  }/${  DIR  }/${  exp}`, 'utf-8');
+                code = fs.readFileSync(`${__dirname}/${DIR}/${file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname}/${DIR}/${exp}`, 'utf-8');
                 test(code, expected);
-                if (fs.existsSync(`${__dirname  }/${  DIR  }/${  min}`)) {
-                    expected = fs.readFileSync(`${__dirname  }/${  DIR  }/${  min}`, 'utf-8');
+                if (fs.existsSync(`${__dirname}/${DIR}/${min}`)) {
+                    expected = fs.readFileSync(`${__dirname}/${DIR}/${min}`, 'utf-8');
                     testMin(code, expected);
                 }
             });

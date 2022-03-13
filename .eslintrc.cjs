@@ -60,6 +60,7 @@ module.exports = {
         quotes: ['error', 'single'],
         'quote-props': ['error', 'as-needed'],
         'brace-style': ['error', '1tbs', { allowSingleLine: true }],
-        'prefer-template': ['error']
+        'prefer-template': ['error'],
+        'template-curly-spacing': ['error']
     }
 };

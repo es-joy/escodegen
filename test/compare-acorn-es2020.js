@@ -64,7 +64,7 @@ function testMin(code, expected) {
     const actual = `${escodegen.generate(tree, {
         format: escodegen.FORMAT_MINIFY,
         raw: false
-    }).replace(/[\n\r]$/, '')  }\n`;
+    }).replace(/[\n\r]$/, '')}\n`;
     const actualTree = acorn.parse(actual, options);
 
     expect(actual).to.be.equal(expected);
@@ -72,17 +72,17 @@ function testMin(code, expected) {
 }
 
 describe('compare acorn es2020 test', function () {
-    fs.readdirSync(`${__dirname  }/compare-acorn-es2020`).sort().forEach(function(file) {
+    fs.readdirSync(`${__dirname}/compare-acorn-es2020`).sort().forEach(function(file) {
         let code, expected, exp, min;
         if (/\.js$/.test(file) && !/expected\.js$/.test(file) && !/expected\.min\.js$/.test(file)) {
             it(file, function () {
                 exp = file.replace(/\.js$/, '.expected.js');
                 min = file.replace(/\.js$/, '.expected.min.js');
-                code = fs.readFileSync(`${__dirname  }/compare-acorn-es2020/${  file}`, 'utf-8');
-                expected = fs.readFileSync(`${__dirname  }/compare-acorn-es2020/${  exp}`, 'utf-8');
+                code = fs.readFileSync(`${__dirname}/compare-acorn-es2020/${file}`, 'utf-8');
+                expected = fs.readFileSync(`${__dirname}/compare-acorn-es2020/${exp}`, 'utf-8');
                 test(code, expected);
-                if (fs.existsSync(`${__dirname  }/compare-acorn-es2020/${  min}`)) {
-                    expected = fs.readFileSync(`${__dirname  }/compare-acorn-es2020/${  min}`, 'utf-8');
+                if (fs.existsSync(`${__dirname}/compare-acorn-es2020/${min}`)) {
+                    expected = fs.readFileSync(`${__dirname}/compare-acorn-es2020/${min}`, 'utf-8');
                     testMin(code, expected);
                 }
             });
