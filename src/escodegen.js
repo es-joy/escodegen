@@ -803,46 +803,6 @@ function generateVerbatim(expr, precedence) {
     return toSourceNodeWhenNeeded(result, expr);
 }
 
-function CodeGenerator() {
-}
-
-// Helpers.
-
-CodeGenerator.prototype.maybeBlock = function(stmt, flags) {
-    let result;
-    const that = this;
-
-    const noLeadingComment = !extra.comment || !stmt.leadingComments;
-
-    if (stmt.type === Syntax.BlockStatement && noLeadingComment) {
-        return [space, this.generateStatement(stmt, flags)];
-    }
-
-    if (stmt.type === Syntax.EmptyStatement && noLeadingComment) {
-        return ';';
-    }
-
-    withIndent(function () {
-        result = [
-            newline,
-            addIndent(that.generateStatement(stmt, flags))
-        ];
-    });
-
-    return result;
-};
-
-CodeGenerator.prototype.maybeBlockSuffix = function (stmt, result) {
-    const ends = endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString());
-    if (stmt.type === Syntax.BlockStatement && (!extra.comment || !stmt.leadingComments) && !ends) {
-        return [result, space];
-    }
-    if (ends) {
-        return [result, base];
-    }
-    return [result, newline, base];
-};
-
 function generateIdentifier(node) {
     return toSourceNodeWhenNeeded(node.name, node);
 }
@@ -870,140 +830,217 @@ function generateMethodPrefix(prop) {
     return prefix;
 }
 
-CodeGenerator.prototype.generatePattern = function (node, precedence, flags) {
-    if (node.type === Syntax.Identifier) {
-        return generateIdentifier(node);
-    }
-    return this.generateExpression(node, precedence, flags);
-};
+class CodeGenerator {
 
-CodeGenerator.prototype.generateFunctionParams = function (node) {
-    let i, iz, result, hasDefault;
+    // Helpers.
 
-    hasDefault = false;
+    maybeBlock (stmt, flags) {
+        let result;
+        const that = this;
 
-    if (node.type === Syntax.ArrowFunctionExpression &&
-                !node.rest && (!node.defaults || node.defaults.length === 0) &&
-                node.params.length === 1 && node.params[0].type === Syntax.Identifier) {
-        // arg => { } case
-        result = [generateAsyncPrefix(node, true), generateIdentifier(node.params[0])];
-    } else {
-        result = node.type === Syntax.ArrowFunctionExpression ? [generateAsyncPrefix(node, false)] : [];
-        result.push('(');
-        if (node.defaults) {
-            hasDefault = true;
-        }
-        for (i = 0, iz = node.params.length; i < iz; ++i) {
-            if (hasDefault && node.defaults[i]) {
-                // Handle default values.
-                result.push(this.generateAssignment(node.params[i], node.defaults[i], '=', Precedence.Assignment, E_TTT));
-            } else {
-                result.push(this.generatePattern(node.params[i], Precedence.Assignment, E_TTT));
-            }
-            if (i + 1 < iz) {
-                result.push(`,${space}`);
-            }
+        const noLeadingComment = !extra.comment || !stmt.leadingComments;
+
+        if (stmt.type === Syntax.BlockStatement && noLeadingComment) {
+            return [space, this.generateStatement(stmt, flags)];
         }
 
-        if (node.rest) {
-            if (node.params.length) {
-                result.push(`,${space}`);
-            }
-            result.push('...');
-            result.push(generateIdentifier(node.rest));
+        if (stmt.type === Syntax.EmptyStatement && noLeadingComment) {
+            return ';';
         }
 
-        result.push(')');
+        withIndent(function () {
+            result = [
+                newline,
+                addIndent(that.generateStatement(stmt, flags))
+            ];
+        });
+
+        return result;
     }
 
-    return result;
-};
-
-CodeGenerator.prototype.generateFunctionBody = function (node) {
-    let expr;
-
-    const result = this.generateFunctionParams(node);
-
-    if (node.type === Syntax.ArrowFunctionExpression) {
-        result.push(space);
-        result.push('=>');
-    }
-
-    if (node.expression) {
-        result.push(space);
-        expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT);
-        if (expr.toString().charAt(0) === '{') {
-            expr = ['(', expr, ')'];
+    maybeBlockSuffix (stmt, result) {
+        const ends = endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString());
+        if (stmt.type === Syntax.BlockStatement && (!extra.comment || !stmt.leadingComments) && !ends) {
+            return [result, space];
         }
-        result.push(expr);
-    } else {
-        result.push(this.maybeBlock(node.body, S_TTFF));
+        if (ends) {
+            return [result, base];
+        }
+        return [result, newline, base];
     }
 
-    return result;
-};
+    generatePattern (node, precedence, flags) {
+        if (node.type === Syntax.Identifier) {
+            return generateIdentifier(node);
+        }
+        return this.generateExpression(node, precedence, flags);
+    }
 
-CodeGenerator.prototype.generateIterationForStatement = function (operator, stmt, flags) {
-    let result = [`for${stmt.await ? `${noEmptySpace()}await` : ''}${space}(`];
-    const that = this;
-    withIndent(function () {
-        if (stmt.left.type === Syntax.VariableDeclaration) {
-            withIndent(function () {
-                result.push(stmt.left.kind + noEmptySpace());
-                result.push(that.generateStatement(stmt.left.declarations[0], S_FFFF));
-            });
+    generateFunctionParams (node) {
+        let i, iz, result, hasDefault;
+
+        hasDefault = false;
+
+        if (node.type === Syntax.ArrowFunctionExpression &&
+                    !node.rest && (!node.defaults || node.defaults.length === 0) &&
+                    node.params.length === 1 && node.params[0].type === Syntax.Identifier) {
+            // arg => { } case
+            result = [generateAsyncPrefix(node, true), generateIdentifier(node.params[0])];
         } else {
-            result.push(that.generateExpression(stmt.left, Precedence.Call, E_TTT));
+            result = node.type === Syntax.ArrowFunctionExpression ? [generateAsyncPrefix(node, false)] : [];
+            result.push('(');
+            if (node.defaults) {
+                hasDefault = true;
+            }
+            for (i = 0, iz = node.params.length; i < iz; ++i) {
+                if (hasDefault && node.defaults[i]) {
+                    // Handle default values.
+                    result.push(this.generateAssignment(node.params[i], node.defaults[i], '=', Precedence.Assignment, E_TTT));
+                } else {
+                    result.push(this.generatePattern(node.params[i], Precedence.Assignment, E_TTT));
+                }
+                if (i + 1 < iz) {
+                    result.push(`,${space}`);
+                }
+            }
+
+            if (node.rest) {
+                if (node.params.length) {
+                    result.push(`,${space}`);
+                }
+                result.push('...');
+                result.push(generateIdentifier(node.rest));
+            }
+
+            result.push(')');
         }
 
-        result = join(result, operator);
-        result = [join(
-            result,
-            that.generateExpression(stmt.right, Precedence.Assignment, E_TTT)
-        ), ')'];
-    });
-    result.push(this.maybeBlock(stmt.body, flags));
-    return result;
-};
-
-CodeGenerator.prototype.generatePropertyKey = function (expr, computed) {
-    const result = [];
-
-    if (computed) {
-        result.push('[');
+        return result;
     }
 
-    result.push(this.generateExpression(expr, Precedence.Assignment, E_TTT));
+    generateFunctionBody (node) {
+        let expr;
 
-    if (computed) {
-        result.push(']');
+        const result = this.generateFunctionParams(node);
+
+        if (node.type === Syntax.ArrowFunctionExpression) {
+            result.push(space);
+            result.push('=>');
+        }
+
+        if (node.expression) {
+            result.push(space);
+            expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT);
+            if (expr.toString().charAt(0) === '{') {
+                expr = ['(', expr, ')'];
+            }
+            result.push(expr);
+        } else {
+            result.push(this.maybeBlock(node.body, S_TTFF));
+        }
+
+        return result;
     }
 
-    return result;
-};
+    generateIterationForStatement (operator, stmt, flags) {
+        let result = [`for${stmt.await ? `${noEmptySpace()}await` : ''}${space}(`];
+        const that = this;
+        withIndent(function () {
+            if (stmt.left.type === Syntax.VariableDeclaration) {
+                withIndent(function () {
+                    result.push(stmt.left.kind + noEmptySpace());
+                    result.push(that.generateStatement(stmt.left.declarations[0], S_FFFF));
+                });
+            } else {
+                result.push(that.generateExpression(stmt.left, Precedence.Call, E_TTT));
+            }
 
-CodeGenerator.prototype.generateAssignment = function (left, right, operator, precedence, flags) {
-    if (Precedence.Assignment < precedence) {
-        flags |= F_ALLOW_IN;
+            result = join(result, operator);
+            result = [join(
+                result,
+                that.generateExpression(stmt.right, Precedence.Assignment, E_TTT)
+            ), ')'];
+        });
+        result.push(this.maybeBlock(stmt.body, flags));
+        return result;
     }
 
-    return parenthesize(
-        [
-            this.generateExpression(left, Precedence.Call, flags),
-            space + operator + space,
-            this.generateExpression(right, Precedence.Assignment, flags)
-        ],
-        Precedence.Assignment,
-        precedence
-    );
-};
+    generatePropertyKey (expr, computed) {
+        const result = [];
 
-CodeGenerator.prototype.semicolon = function (flags) {
-    if (!semicolons && flags & F_SEMICOLON_OPT) {
-        return '';
+        if (computed) {
+            result.push('[');
+        }
+
+        result.push(this.generateExpression(expr, Precedence.Assignment, E_TTT));
+
+        if (computed) {
+            result.push(']');
+        }
+
+        return result;
     }
-    return ';';
-};
+
+    generateAssignment (left, right, operator, precedence, flags) {
+        if (Precedence.Assignment < precedence) {
+            flags |= F_ALLOW_IN;
+        }
+
+        return parenthesize(
+            [
+                this.generateExpression(left, Precedence.Call, flags),
+                space + operator + space,
+                this.generateExpression(right, Precedence.Assignment, flags)
+            ],
+            Precedence.Assignment,
+            precedence
+        );
+    }
+
+    semicolon (flags) {
+        if (!semicolons && flags & F_SEMICOLON_OPT) {
+            return '';
+        }
+        return ';';
+    }
+
+    generateExpression (expr, precedence, flags) {
+        let result;
+
+        const type = expr.type || Syntax.Property;
+
+        if (extra.verbatim && Object.prototype.hasOwnProperty.call(expr, extra.verbatim)) {
+            return generateVerbatim(expr, precedence);
+        }
+
+        result = this[type](expr, precedence, flags);
+
+
+        if (extra.comment) {
+            result = addComments(expr, result);
+        }
+        return toSourceNodeWhenNeeded(result, expr);
+    }
+
+    generateStatement (stmt, flags) {
+        let result;
+
+        result = this[stmt.type](stmt, flags);
+
+        // Attach comments
+
+        if (extra.comment) {
+            result = addComments(stmt, result);
+        }
+
+        const fragment = toSourceNodeWhenNeeded(result).toString();
+        if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
+            result = sourceMap ? toSourceNodeWhenNeeded(result).replaceRight(/\s+$/, '') : fragment.replace(/\s+$/, '');
+        }
+
+        return toSourceNodeWhenNeeded(result, stmt);
+    }
+}
 
 // Statements.
 
@@ -1778,7 +1815,6 @@ CodeGenerator.Statement = {
         result.push(this.maybeBlock(stmt.body, flags & F_SEMICOLON_OPT ? S_TFFT : S_TFFF));
         return result;
     }
-
 };
 
 merge(CodeGenerator.prototype, CodeGenerator.Statement);
@@ -2499,43 +2535,6 @@ CodeGenerator.Expression = {
 };
 
 merge(CodeGenerator.prototype, CodeGenerator.Expression);
-
-CodeGenerator.prototype.generateExpression = function (expr, precedence, flags) {
-    let result;
-
-    const type = expr.type || Syntax.Property;
-
-    if (extra.verbatim && Object.prototype.hasOwnProperty.call(expr, extra.verbatim)) {
-        return generateVerbatim(expr, precedence);
-    }
-
-    result = this[type](expr, precedence, flags);
-
-
-    if (extra.comment) {
-        result = addComments(expr, result);
-    }
-    return toSourceNodeWhenNeeded(result, expr);
-};
-
-CodeGenerator.prototype.generateStatement = function (stmt, flags) {
-    let result;
-
-    result = this[stmt.type](stmt, flags);
-
-    // Attach comments
-
-    if (extra.comment) {
-        result = addComments(stmt, result);
-    }
-
-    const fragment = toSourceNodeWhenNeeded(result).toString();
-    if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
-        result = sourceMap ? toSourceNodeWhenNeeded(result).replaceRight(/\s+$/, '') : fragment.replace(/\s+$/, '');
-    }
-
-    return toSourceNodeWhenNeeded(result, stmt);
-};
 
 function generateInternal(node) {
     const codegen = new CodeGenerator();
