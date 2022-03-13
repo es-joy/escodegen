@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## ?
+
+- feat: export `version` and export `browser: false` for Node
+
 ## 3.0.2
 
 - fix: ESM `exports` paths

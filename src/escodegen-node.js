@@ -4,3 +4,5 @@ import { generate } from './escodegen.js';
 generate.sourceMapModule = sourceMap;
 
 export * from './escodegen.js';
+
+export const browser = false;

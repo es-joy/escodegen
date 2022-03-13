@@ -2586,13 +2586,10 @@ const FORMAT_MINIFY = {
 
 const FORMAT_DEFAULTS = getDefaultOptions().format;
 
-// const browser = false;
 const PrecedenceCopy = updateDeeply({}, Precedence);
 const { attachComments } = estraverse;
 
 export {
-    // version = require('./package.json').version;
-    // browser,
     generate,
     attachComments,
     PrecedenceCopy as Precedence,

@@ -14,7 +14,7 @@ module.exports = {
         ecmaVersion: 2020
     },
     overrides: [{
-        files: ['*-node.js', '.eslintrc.cjs', 'benchmark/**', 'bin/**', 'tools/**'],
+        files: ['*-node.js', '.eslintrc.cjs', 'benchmark/**', 'bin/**', 'tools/**', 'rollup.config.js'],
         env: {
             node: true
         }
