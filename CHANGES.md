@@ -1,5 +1,13 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.0.2
+
+- fix: ESM `exports` paths
+
+## 3.0.1
+
+- docs: fix install target
+
 ## 3.0.0
 
 Initial fork of [`escodegen`](https://github.com/estools/escodegen).

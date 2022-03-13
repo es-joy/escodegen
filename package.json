@@ -7,10 +7,10 @@
     "main": "./dist/escodegen.cjs",
     "exports": {
         "node": {
-            "import": "./dist/escodgen-node.esm.js",
+            "import": "./dist/escodegen-node.esm.js",
             "require": "./dist/escodegen.cjs"
         },
-        "browser-import": "./dist/escodgen-browser.esm.js",
+        "browser-import": "./dist/escodegen-browser.esm.js",
         "browser": "./dist/escodegen-browser.umd.js"
     },
     "bin": {
@@ -28,7 +28,7 @@
         "dist",
         "package.json"
     ],
-    "version": "3.0.1",
+    "version": "3.0.2",
     "engines": {
         "node": ">=6.0"
     },
