@@ -10,7 +10,6 @@ const { version } = JSON.parse(
     )
 );
 
-
 /**
  * @external RollupConfig
  * @type {PlainObject}

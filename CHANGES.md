@@ -3,6 +3,7 @@
 ## ?
 
 - feat: export `version` and export `browser: false` for Node
+- chore: switch to `@es-joy/estraverse`
 
 ## 3.0.2
 

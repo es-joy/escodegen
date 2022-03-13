@@ -34,7 +34,7 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-import * as estraverse from 'estraverse';
+import * as estraverse from '@es-joy/estraverse';
 import * as esutils from 'esutils';
 
 let SourceNode,

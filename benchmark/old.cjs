@@ -60,7 +60,7 @@
         FORMAT_MINIFY,
         FORMAT_DEFAULTS;
 
-    estraverse = require('estraverse');
+    estraverse = require('@es-joy/estraverse');
     esutils = require('esutils');
 
     Syntax = {
