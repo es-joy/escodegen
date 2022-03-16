@@ -50,6 +50,26 @@ const fixtures = {
         }],
         result: '{\n    test;\n}'
     },
+    'generate with object options that are not objects by default': {
+        call: 'generate',
+        args: [{
+            type: 'Program',
+            body: [{
+                type: 'BlockStatement',
+                body: [{
+                    type: 'ExpressionStatement',
+                    expression: {
+                        type: 'Identifier',
+                        name: 'test'
+                    }
+                }]
+            }],
+        }, {
+            // Not needed as an object, but covering the code
+            indent: {},
+        }],
+        result: '{\n    test;\n}'
+    },
     'generate with indent 2': {
         call: 'generate',
         args: [{

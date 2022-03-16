@@ -4450,6 +4450,99 @@ const data = {
                     }]
                 }],
             }
+        },
+
+        'var x = /Here\u2028are\u2029some\nspecial\rcharacters/;': {
+            generateFrom: {
+                type: 'Program',
+                body: [
+                    {
+                        type: 'VariableDeclaration',
+                        declarations: [
+                            {
+                                type: 'VariableDeclarator',
+                                id: {
+                                    type: 'Identifier',
+                                    name: 'x'
+                                },
+                                init: {
+                                    type: 'Literal',
+                                    value: {},
+                                    raw: '/Here\u2028are\u2029some\nspecial\rcharacters/',
+                                    regex: {
+                                        pattern: 'Here\u2028are\u2029some\nspecial\rcharacters',
+                                        flags: ''
+                                    }
+                                }
+                            }
+                        ],
+                        kind: 'var'
+                    }
+                ],
+                sourceType: 'module'
+            }
+        },
+        'var x = /Here\\u2028are\\u2029some\\/very\\nspecial\\rcharacters\\u2028for\\nyou/;': {
+            generateFrom: {
+                type: 'Program',
+                body: [
+                    {
+                        type: 'VariableDeclaration',
+                        declarations: [
+                            {
+                                type: 'VariableDeclarator',
+                                id: {
+                                    type: 'Identifier',
+                                    name: 'x'
+                                },
+                                init: {
+                                    type: 'Literal',
+                                    // eslint-disable-next-line no-control-regex -- Needed for test
+                                    value: {
+                                        source: 'Here\u2028are\u2029some/very\nspecial\rcharacters\\\u2028for\\\nyou',
+                                        toString () {
+                                            return '/Here\u2028are\u2029some/very\nspecial\rcharacters\\\u2028for\\\nyou/';
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        kind: 'var'
+                    }
+                ],
+                sourceType: 'module'
+            }
+        },
+        'var x = something;': {
+            generateFrom: {
+                type: 'Program',
+                body: [
+                    {
+                        type: 'VariableDeclaration',
+                        declarations: [
+                            {
+                                type: 'VariableDeclarator',
+                                id: {
+                                    type: 'Identifier',
+                                    name: 'x'
+                                },
+                                init: {
+                                    type: 'Literal',
+                                    // eslint-disable-next-line no-control-regex -- Needed for test
+                                    value: {
+                                        source: 'something',
+                                        toString () {
+                                            return 'something';
+                                        }
+                                    }
+                                }
+                            }
+                        ],
+                        kind: 'var'
+                    }
+                ],
+                sourceType: 'module'
+            }
         }
 
     },
@@ -14948,7 +15041,7 @@ function runTest(code, result) {
     }
 }
 
-describe('general test', function () {
+describe.only('general test', function () {
     Object.keys(data).forEach(function (category) {
         it(category, function () {
             Object.keys(data[category]).forEach(function (source) {

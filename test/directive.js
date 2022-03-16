@@ -183,16 +183,35 @@ const data = {
                     }
                 }
             }]
-        }
+        },
 
+        '(function () {\n    \'use\\u0020strict"\';\n});': {
+            type: 'Program',
+            body: [{
+                type: 'ExpressionStatement',
+                expression: {
+                    type: 'FunctionExpression',
+                    id: null,
+                    params: [],
+                    body: {
+                        type: 'BlockStatement',
+                        body: [{
+                            type: 'DirectiveStatement',
+                            directive: 'use\\u0020strict"',
+                        }]
+                    }
+                }
+            }]
+        },
     }
 };
 
-function runTest(expected, result) {
+function runTest(expected, result, opts) {
     const options = {
         indent: '    ',
         directive: true,
-        parse: esprima.parse
+        parse: esprima.parse,
+        ...opts
     };
 
     const actual = escodegen.generate(result, options);
@@ -207,4 +226,18 @@ describe('directive support', function () {
             });
         });
     });
+
+    runTest(
+        '"use strict";',
+        {
+            type: 'Program',
+            body: [{
+                type: 'DirectiveStatement',
+                directive: 'use strict',
+            }]
+        },
+        {
+            format: { quotes: 'double' }
+        }
+    );
 });

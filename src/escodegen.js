@@ -407,7 +407,7 @@ function escapeDisallowedCharacter(code) {
     if (code === 0x2029) {
         return '\\u2029';
     }
-
+    /* c8 ignore next */
     throw new Error('Incorrectly classified character');
 }
 
