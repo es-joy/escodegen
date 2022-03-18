@@ -29,7 +29,7 @@
 */
 
 import esprima from './3rdparty/esprima-1.0.0-dev.js';
-import escodegen from './loader.js';
+import { getRunTest } from './utils.js';
 
 const data = {
 
@@ -14988,60 +14988,15 @@ const data = {
     }
 };
 
-// Special handling for regular expression literal since we need to
-// convert it to a string literal, otherwise it will be decoded
-// as object "{}" and the regular expression would be lost.
-function adjustRegexLiteral(key, value) {
-    if (key === 'value' && value instanceof RegExp) {
-        value = value.toString();
-    }
-    return value;
-}
+const runTest = getRunTest(esprima, {
+    comment: false,
+    range: false,
+    loc: false,
+    tokens: false,
+    raw: false
+});
 
-function testIdentity(code, syntax) {
-    const options = {
-        comment: false,
-        range: false,
-        loc: false,
-        tokens: false,
-        raw: false
-    };
-
-    let actual, actual2, expected;
-    expect(function () {
-        let tree = esprima.parse(code, options);
-        expected = JSON.stringify(tree, adjustRegexLiteral, 4);
-        tree = esprima.parse(escodegen.generate(tree), options);
-        actual = JSON.stringify(tree, adjustRegexLiteral, 4);
-        tree = esprima.parse(escodegen.generate(syntax), options);
-        actual2 = JSON.stringify(tree, adjustRegexLiteral, 4);
-    }).not.to.be.throw();
-    expect(actual).to.be.equal(expected);
-    expect(actual2).to.be.equal(expected);
-}
-
-function testGenerate(expected, result) {
-    const options = {
-        indent: '    ',
-        parse: esprima.parse
-    };
-
-    let actual;
-    expect(function () {
-        actual = escodegen.generate(result.generateFrom, options);
-    }).not.to.be.throw();
-    expect(actual).to.be.equal(expected);
-}
-
-function runTest(code, result) {
-    if (Object.prototype.hasOwnProperty.call(result, 'generateFrom')) {
-        testGenerate(code, result);
-    } else {
-        testIdentity(code, result);
-    }
-}
-
-describe.only('general test', function () {
+describe('general test', function () {
     Object.keys(data).forEach(function (category) {
         it(category, function () {
             Object.keys(data[category]).forEach(function (source) {

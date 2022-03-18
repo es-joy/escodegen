@@ -7,7 +7,7 @@ module.exports = {
         SharedArrayBuffer: 'readonly'
     },
     env: {
-        es6: true
+        es2020: true
     },
     parserOptions: {
         sourceType: 'module',
