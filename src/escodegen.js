@@ -519,6 +519,7 @@ function join(left, right) {
     }
 
     const rightSource = toSourceNodeWhenNeeded(right).toString();
+    /* c8 ignore next 3 */
     if (rightSource.length === 0) {
         return [left];
     }
@@ -612,6 +613,7 @@ function adjustMultilineComment(value, specialBase) {
 
 function generateComment(comment, specialBase) {
     if (comment.type === 'Line') {
+        // console.log('comment.value', JSON.stringify(comment.value));
         if (endsWithLineTerminator(comment.value)) {
             return `//${comment.value}`;
         } else {
