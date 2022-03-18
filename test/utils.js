@@ -31,7 +31,7 @@ function getRunTest (parser, identityOptions) {
     function testGenerate(expected, result) {
         const options = {
             indent: '    ',
-            parse: parser.parse
+            parse: parser && parser.parse
         };
 
         let actual;
