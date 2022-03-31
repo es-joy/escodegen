@@ -23,39 +23,67 @@
  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import esprima from 'esprima';
-import escodegen from './loader.js';
+// import esprima from 'esprima';
+import { generate } from '../src/escodegen-node.js';
 
-function test(code, expected) {
+const data = {
+    'Line comments': {
+        '// abc\u2029': {
+            type: 'Program',
+            body: [],
+            sourceType: 'script',
+            range: [ 7, 7 ],
+            tokens: [],
+            comments: [{
+                range: [0, 7],
+                type: 'Line',
+                value: ' abc\u2029'
+            }],
+            leadingComments: [{
+                type: 'Line',
+                value: ' abc\u2029',
+                range: [{
+                    0: 0,
+                    1: 7
+                }],
+                extendedRange: [0, 7]
+            }]
+        }
+    },
+};
+
+function test(code, result) {
     let options = {
         range: true,
         tokens: true,
         comment: true
     };
 
-    let tree = esprima.parse(code, options);
-    tree = escodegen.attachComments(tree, tree.comments, tree.tokens);
+    // This isn't actually generatable by Esprima apparently, so
+    //  we only check the
+    // let tree = esprima.parse(code, options);
+    // tree = attachComments(tree, tree.comments, tree.tokens);
 
     options = {
         comment: true,
-        sourceCode: code,
-        format: {
-            preserveBlankLines: true
-        }
+        sourceCode: code
     };
 
-    // console.log('tree', tree);
+    const expected = generate(result, options);
 
     // for UNIX text comment
-    const actual = escodegen.generate(tree, options);
-    expect(actual).to.be.equal(expected);
+    // const actual = generate(tree, options);
+    expect(code).to.be.equal(expected);
 }
 
-describe('preserve blank lines test', function () {
-    it('comment with line terminator', function () {
-        const code = '// abc\u2029\n';
-        const expected = '// abc\n';
-        test(code, expected);
+describe('Line comments', function () {
+    Object.keys(data).forEach(function (category) {
+        it(category, function () {
+            Object.keys(data[category]).forEach(function (source) {
+                const expected = data[category][source];
+                test(source, expected);
+            });
+        });
     });
 });
 

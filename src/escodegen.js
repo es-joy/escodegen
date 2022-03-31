@@ -613,7 +613,6 @@ function adjustMultilineComment(value, specialBase) {
 
 function generateComment(comment, specialBase) {
     if (comment.type === 'Line') {
-        // console.log('comment.value', JSON.stringify(comment.value));
         if (endsWithLineTerminator(comment.value)) {
             return `//${comment.value}`;
         } else {
