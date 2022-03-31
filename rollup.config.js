@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
+import replace from '@rollup/plugin-replace';
 
 const { version } = JSON.parse(
     readFileSync(
@@ -28,7 +29,6 @@ function getRollupObject ({ minifying, format = 'umd', browser = false } = {}) {
         input: `src/escodegen-${browser ? 'browser' : 'node'}.js`,
         output: {
             format,
-            banner: `export const version = '${version}';`,
             sourcemap: true, // minifying,
             file: `dist/escodegen${
                 format === 'cjs' ? '' : browser ? '-browser' : '-node'
@@ -38,6 +38,13 @@ function getRollupObject ({ minifying, format = 'umd', browser = false } = {}) {
             name: 'escodegen'
         },
         plugins: [
+            // Avoid for entry files which already reexport a version
+            replace({
+                'export {': `export const version = '${version}';\nexport {`,
+                preventAssignment: true,
+                delimiters: ['', ''],
+                include: ['src/escodegen.js']
+            }),
             resolve(),
             commonjs()
         ]
