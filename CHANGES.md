@@ -1,6 +1,6 @@
 # CHANGES for `@es-joy/escodegen`
 
-## ?
+## 3.1.0
 
 - feat: export `version` and export `browser: false` for Node
 - chore: switch to `@es-joy/estraverse`
