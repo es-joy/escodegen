@@ -12600,8 +12600,81 @@ const data = {
                 start: { line: 1, column: 0 },
                 end: { line: 1, column: 56 }
             }
+        },
+        'switch (answer) { case 42: {hi();} break; }': {
+            type: 'SwitchStatement',
+            discriminant: {
+                type: 'Identifier',
+                name: 'answer',
+                range: [8, 14],
+                loc: {
+                    start: { line: 1, column: 8 },
+                    end: { line: 1, column: 14 }
+                }
+            },
+            cases: [{
+                type: 'SwitchCase',
+                test: {
+                    type: 'Literal',
+                    value: 42,
+                    raw: '42',
+                    range: [23, 25],
+                    loc: {
+                        start: { line: 1, column: 23 },
+                        end: { line: 1, column: 25 }
+                    }
+                },
+                consequent: [{
+                    type: 'BlockStatement',
+                    body: [
+                        {
+                            type: 'ExpressionStatement',
+                            expression: {
+                                type: 'CallExpression',
+                                callee: {
+                                    type: 'Identifier',
+                                    name: 'hi',
+                                    range: [27, 29],
+                                    loc: {
+                                        start: { line: 1, column: 27 },
+                                        end: { line: 1, column: 29 }
+                                    }
+                                },
+                                arguments: [],
+                                range: [27, 31],
+                                loc: {
+                                    start: { line: 1, column: 27 },
+                                    end: { line: 1, column: 31 }
+                                }
+                            },
+                            range: [27, 32],
+                            loc: {
+                                start: { line: 1, column: 27 },
+                                end: { line: 1, column: 32 }
+                            }
+                        }
+                    ]
+                }, {
+                    type: 'BreakStatement',
+                    label: null,
+                    range: [33, 39],
+                    loc: {
+                        start: { line: 1, column: 33 },
+                        end: { line: 1, column: 39 }
+                    }
+                }],
+                range: [18, 39],
+                loc: {
+                    start: { line: 1, column: 18 },
+                    end: { line: 1, column: 39 }
+                }
+            }],
+            range: [0, 41],
+            loc: {
+                start: { line: 1, column: 0 },
+                end: { line: 1, column: 41 }
+            }
         }
-
     },
 
     'Labelled Statements': {
