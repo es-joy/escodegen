@@ -6905,6 +6905,16 @@ const data = {
                     name: 'asynca'
                 }
             }
+        },
+
+        'async ;': {
+            generateFrom: {
+                type: 'ExpressionStatement',
+                expression: {
+                    type: 'Identifier',
+                    name: 'async '
+                }
+            }
         }
     },
 
