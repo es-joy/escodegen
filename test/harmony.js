@@ -2583,6 +2583,36 @@ const data = {
         }
     },
 
+    // Unlikely ever valid, but covering code for now
+    'Harmony object pattern (empty)': {
+        'const {} = {};': {
+            generateFrom: {
+                type: 'Program',
+                body: [
+                    {
+                        type: 'VariableDeclaration',
+                        declarations: [
+                            {
+                                type: 'VariableDeclarator',
+                                id: {
+                                    type: 'ObjectPattern',
+                                    properties: [
+                                    ]
+                                },
+                                init: {
+                                    type: 'ObjectExpression',
+                                    properties: []
+                                }
+                            }
+                        ],
+                        kind: 'const'
+                    }
+                ],
+                sourceType: 'script'
+            }
+        }
+    },
+
     'Harmony object pattern, singleline, 1 property: RestElement': {
         'const {...foo} = {};': {
             generateFrom: {
