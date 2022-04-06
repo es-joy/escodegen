@@ -727,6 +727,7 @@ function addComments(stmt, result) {
                         result = [result, specialBase];
                     }
                     result.push(generateComment(comment, specialBase));
+                /* c8 ignore next 3 */
                 } else {
                     result = [result, addIndent(generateComment(comment))];
                 }
