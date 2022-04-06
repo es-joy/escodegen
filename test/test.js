@@ -377,6 +377,53 @@ const data = {
             }
         },
 
+        'x = [\n    43,\n    ,\n];': {
+            generateFrom: {
+                type: 'ExpressionStatement',
+                expression: {
+                    type: 'AssignmentExpression',
+                    operator: '=',
+                    left: {
+                        type: 'Identifier',
+                        name: 'x',
+                        range: [0, 1],
+                        loc: {
+                            start: { line: 1, column: 0 },
+                            end: { line: 1, column: 1 }
+                        }
+                    },
+                    right: {
+                        type: 'ArrayExpression',
+                        elements: [{
+                            type: 'Literal',
+                            value: 43,
+                            raw: '43',
+                            range: [6, 8],
+                            loc: {
+                                start: { line: 1, column: 6 },
+                                end: { line: 1, column: 8 }
+                            }
+                        }, null],
+                        range: [4, 11],
+                        loc: {
+                            start: { line: 1, column: 4 },
+                            end: { line: 1, column: 11 }
+                        }
+                    },
+                    range: [0, 11],
+                    loc: {
+                        start: { line: 1, column: 0 },
+                        end: { line: 1, column: 11 }
+                    }
+                },
+                range: [0, 11],
+                loc: {
+                    start: { line: 1, column: 0 },
+                    end: { line: 1, column: 11 }
+                }
+            }
+        },
+
         'x = [ ,, 42 ]': {
             type: 'ExpressionStatement',
             expression: {
