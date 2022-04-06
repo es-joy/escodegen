@@ -825,6 +825,20 @@ const data = [{
 }, {
     options: {
         comment: true,
+        sourceMap: true,
+        format: {
+            compact: true,
+            indent: {
+                adjustMultilineComment: true
+            }
+        }
+    },
+    items: {
+        '// from #23\n/**/\n/*\n*/': '// from #23\n/**/\n/*\n*/'
+    }
+}, {
+    options: {
+        comment: true,
         format: {
             compact: true,
             semicolons: false,
@@ -978,7 +992,14 @@ function runTest(options, source, expectedCode) {
     if (options.comment) {
         tree = escodegen.attachComments(tree, tree.comments, tree.tokens);
     }
+
     const actualCode = escodegen.generate(tree, options);
+    if (options.sourceMap) {
+        expect(actualCode).to.be.equal(
+            '{"version":3,"sources":[],"names":[],"mappings":""}'
+        );
+        return;
+    }
     tree = esprima.parse(actualCode);
     const actualTree = JSON.stringify(tree, adjustRegexLiteral, 4);
     expect(actualTree).to.be.equal(expectedTree);
