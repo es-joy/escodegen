@@ -1859,6 +1859,46 @@ const data = {
             }
         },
 
+        '[for (var x in []) x];':{
+            generateFrom: {
+                type: 'Program',
+                body: [{
+                    type: 'ExpressionStatement',
+                    expression: {
+                        type: 'ComprehensionExpression',
+                        filter: null,
+                        blocks: [{
+                            type: 'ComprehensionBlock',
+                            left: {
+                                type: 'VariableDeclaration',
+                                kind: 'var',
+                                declarations: [
+                                    {
+                                        type: 'VariableDeclarator',
+                                        init: null,
+                                        id: {
+                                            type: 'Identifier',
+                                            name: 'x'
+                                        }
+                                    }
+                                ]
+                            },
+                            right: {
+                                type: 'ArrayExpression',
+                                elements: []
+                            },
+                            each: false,
+                            of: false
+                        }],
+                        body: {
+                            type: 'Identifier',
+                            name: 'x'
+                        }
+                    }
+                }]
+            }
+        },
+
         '[x for (x in [])];':{
             generateFrom: {
                 type: 'Program',
@@ -7173,6 +7213,15 @@ const data = {
                         }
                     ]
                 }
+            }
+        }
+    },
+    'module specifier': {
+        '"abc"': {
+            generateFrom: {
+                type: 'ModuleSpecifier',
+                value: 'abc',
+                raw: '"abc"'
             }
         }
     }
