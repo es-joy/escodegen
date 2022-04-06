@@ -516,4 +516,43 @@ describe('source map test', function () {
         expect(result.code).to.be.a('string');
         expect(result.map).to.be.equal(null);
     });
+
+    it('gets source map string for function expression identifier test', function () {
+        // https://github.com/Constellation/escodegen/issues/107
+        const ast = {
+            type: 'FunctionExpression',
+            id: {
+                type: 'Identifier',
+                name: 'x',
+                loc: {
+                    start: {
+                        line: 2,
+                        column: 4
+                    },
+                    end: {
+                        line: 2,
+                        column: 5
+                    }
+                }
+            },
+            params: [],
+            defaults: [],
+            body: {
+                type: 'BlockStatement',
+                body: [],
+            },
+            rest: null,
+            generator: false,
+            expression: false,
+        };
+
+        // function x() {\n}
+        const result = escodegen.generate(ast, {
+            sourceMap: '107'
+        });
+
+        expect(result).to.equal(
+            '{"version":3,"sources":["107"],"names":["x"],"mappings":"SACIA,C"}'
+        );
+    });
 });
