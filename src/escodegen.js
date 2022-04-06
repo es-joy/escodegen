@@ -1238,8 +1238,6 @@ CodeGenerator.Statement = {
         if (stmt.specifiers) {
             if (stmt.specifiers.length === 0) {
                 result = join(result, `{${space}}`);
-            } else if (stmt.specifiers[0].type === Syntax.ExportBatchSpecifier) {
-                result = join(result, this.generateExpression(stmt.specifiers[0], Precedence.Sequence, E_TTT));
             } else {
                 result = join(result, '{');
                 withIndent(function (indent) {
