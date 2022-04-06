@@ -5155,6 +5155,115 @@ const data = {
     },
 
     'Harmony async/await': {
+        'async function foo(promise) {\n    await* promise;\n}': {
+            generateFrom: {
+                type: 'FunctionDeclaration',
+                id: {
+                    type: 'Identifier',
+                    name: 'foo',
+                    range: [15, 18],
+                    loc: {
+                        start: {
+                            line: 1,
+                            column: 15
+                        },
+                        end: {
+                            line: 1,
+                            column: 18
+                        }
+                    }
+                },
+                params: [{
+                    type: 'Identifier',
+                    name: 'promise',
+                    range: [19, 26],
+                    loc: {
+                        start: {
+                            line: 1,
+                            column: 19
+                        },
+                        end: {
+                            line: 1,
+                            column: 26
+                        }
+                    }
+                }],
+                defaults: [],
+                body: {
+                    type: 'BlockStatement',
+                    body: [{
+                        type: 'ExpressionStatement',
+                        expression: {
+                            type: 'AwaitExpression',
+                            all: true,
+                            argument: {
+                                type: 'Identifier',
+                                name: 'promise',
+                                range: [36, 43],
+                                loc: {
+                                    start: {
+                                        line: 1,
+                                        column: 36
+                                    },
+                                    end: {
+                                        line: 1,
+                                        column: 43
+                                    }
+                                }
+                            },
+                            range: [30, 43],
+                            loc: {
+                                start: {
+                                    line: 1,
+                                    column: 30
+                                },
+                                end: {
+                                    line: 1,
+                                    column: 43
+                                }
+                            }
+                        },
+                        range: [30, 44],
+                        loc: {
+                            start: {
+                                line: 1,
+                                column: 30
+                            },
+                            end: {
+                                line: 1,
+                                column: 44
+                            }
+                        }
+                    }],
+                    range: [28, 46],
+                    loc: {
+                        start: {
+                            line: 1,
+                            column: 28
+                        },
+                        end: {
+                            line: 1,
+                            column: 46
+                        }
+                    }
+                },
+                rest: null,
+                generator: false,
+                expression: false,
+                async: true,
+                range: [0, 46],
+                loc: {
+                    start: {
+                        line: 1,
+                        column: 0
+                    },
+                    end: {
+                        line: 1,
+                        column: 46
+                    }
+                }
+            }
+        },
         'async function foo(promise) {\n    await promise;\n}': {
             generateFrom: {
                 type: 'FunctionDeclaration',
