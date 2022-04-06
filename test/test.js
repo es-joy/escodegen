@@ -13512,6 +13512,42 @@ const data = {
             }
         },
 
+        'try {\n} catch (e) {\n} catch (f) {\n}': {
+            generateFrom: {
+                type: 'Program',
+                body: [{
+                    type: 'TryStatement',
+                    block: {
+                        type: 'BlockStatement',
+                        body: []
+                    },
+                    guardedHandlers: [],
+                    handler: [{
+                        type: 'CatchClause',
+                        param: {
+                            type: 'Identifier',
+                            name: 'e'
+                        },
+                        body: {
+                            type: 'BlockStatement',
+                            body: []
+                        }
+                    }, {
+                        type: 'CatchClause',
+                        param: {
+                            type: 'Identifier',
+                            name: 'f'
+                        },
+                        body: {
+                            type: 'BlockStatement',
+                            body: []
+                        }
+                    }],
+                    finalizer: null,
+                }]
+            }
+        },
+
         'function t() {\n    try {\n    } catch (e) {\n    } finally {\n    }\n}': {
             generateFrom: {
                 type: 'Program',
