@@ -6896,6 +6896,16 @@ const data = {
                 async: true
             }
         },
+
+        'asynca;': {
+            generateFrom: {
+                type: 'ExpressionStatement',
+                expression: {
+                    type: 'Identifier',
+                    name: 'asynca'
+                }
+            }
+        }
     },
 
     'ES2018 for-await-of': {
