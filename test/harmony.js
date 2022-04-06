@@ -504,6 +504,18 @@ const data = {
         }
     },
 
+    'function prefixed expression': {
+        '(function\n);': {
+            generateFrom: {
+                type: 'ExpressionStatement',
+                expression: {
+                    type: 'Identifier',
+                    name: 'function\n'
+                }
+            }
+        }
+    },
+
     'Object destructuring (and aliasing)':  {
         'let {\n    test: myvar = \'a\'\n} = { test: \'b\' };': {
             generateFrom: {
