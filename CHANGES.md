@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.1.1
+
+- fix: `exports` for `import` and `browser`
+
 ## 3.1.0
 
 - feat: export `version` and export `browser: false` for Node
