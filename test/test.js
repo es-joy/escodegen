@@ -6212,8 +6212,38 @@ const data = {
                 start: { line: 1, column: 0 },
                 end: { line: 1, column: 8 }
             }
-        }
+        },
 
+        // If a single-character identifier part could be a unary
+        //  operator, add a space
+        '_ x;': {
+            generateFrom: {
+                type: 'ExpressionStatement',
+                expression: {
+                    type: 'UnaryExpression',
+                    operator: '_',
+                    argument: {
+                        type: 'Identifier',
+                        name: 'x',
+                        range: [5, 6],
+                        loc: {
+                            start: { line: 1, column: 5 },
+                            end: { line: 1, column: 6 }
+                        }
+                    },
+                    range: [0, 6],
+                    loc: {
+                        start: { line: 1, column: 0 },
+                        end: { line: 1, column: 6 }
+                    }
+                },
+                range: [0, 6],
+                loc: {
+                    start: { line: 1, column: 0 },
+                    end: { line: 1, column: 6 }
+                }
+            }
+        }
     },
 
     'Multiplicative Operators': {
