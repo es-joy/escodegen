@@ -68,10 +68,11 @@
     },
     "license": "BSD-2-Clause",
     "c8": {
-        "branches": 92.23,
-        "lines": 97.14,
-        "functions": 98.61,
-        "statements": 97.17,
+        "checkCoverage": true,
+        "branches": 100,
+        "lines": 100,
+        "functions": 100,
+        "statements": 100,
         "reporter": [
             "lcov",
             "text"
