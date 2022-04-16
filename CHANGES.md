@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.3.0
+
+- feat: check for `jsdoc` on statements or expressions
+
 ## 3.2.1
 
 - fix: attempt to fix stale `dist` files

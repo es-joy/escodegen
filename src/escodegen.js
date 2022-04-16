@@ -993,6 +993,9 @@ class CodeGenerator {
         }
 
         let result = this[type](expr, precedence, flags);
+        if (expr.jsdoc) {
+            result.unshift(this[expr.jsdoc.type](expr.jsdoc));
+        }
         if (extra.comment) {
             result = addComments(expr, result);
         }
@@ -1002,6 +1005,9 @@ class CodeGenerator {
 
     generateStatement (stmt, flags) {
         let result = this[stmt.type](stmt, flags);
+        if (stmt.jsdoc) {
+            result.unshift(this[stmt.jsdoc.type](stmt.jsdoc));
+        }
 
         // Attach comments
 
