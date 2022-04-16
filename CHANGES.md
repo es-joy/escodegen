@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.2.0
+
+- feat: allow supplying own `CodeGenerator` factory
+
 ## 3.1.1
 
 - fix: `exports` for `import` and `browser`

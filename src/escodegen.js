@@ -55,7 +55,8 @@ let SourceNode,
     parse,
     sourceMap,
     sourceCode,
-    preserveBlankLines;
+    preserveBlankLines,
+    codegenFactory;
 
 const { Syntax } = estraverse;
 
@@ -168,6 +169,7 @@ function getDefaultOptions() {
         base: null,
         parse: null,
         comment: false,
+        codegenFactory: () => new CodeGenerator(),
         format: {
             indent: {
                 style: '    ',
@@ -2485,8 +2487,8 @@ CodeGenerator.Expression = {
 
 merge(CodeGenerator.prototype, CodeGenerator.Expression);
 
-function generateInternal(node) {
-    const codegen = new CodeGenerator();
+function generateInternal(node, codegenFactory) {
+    const codegen = codegenFactory();
     if (isStatement(node)) {
         return codegen.generateStatement(node, S_TFFF);
     }
@@ -2535,7 +2537,7 @@ function generate(node, options) {
     if (options.format.compact) {
         newline = space = indent = base = '';
     }
-    ({ directive, sourceMap, sourceCode } = options);
+    ({ directive, sourceMap, sourceCode, codegenFactory } = options);
     parse = json ? null : options.parse;
     preserveBlankLines = options.format.preserveBlankLines && sourceCode !== null;
     extra = options;
@@ -2544,7 +2546,7 @@ function generate(node, options) {
         ({ SourceNode } = generate.sourceMapModule);
     }
 
-    const result = generateInternal(node);
+    const result = generateInternal(node, codegenFactory);
 
     let pair;
     if (!sourceMap) {
@@ -2590,6 +2592,7 @@ const PrecedenceCopy = updateDeeply({}, Precedence);
 const { attachComments } = estraverse;
 
 export {
+    CodeGenerator,
     generate,
     attachComments,
     PrecedenceCopy as Precedence,

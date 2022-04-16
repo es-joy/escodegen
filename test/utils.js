@@ -10,11 +10,12 @@ function adjustRegexLiteral(key, value) {
     return value;
 }
 
-function getRunTest (parser, identityOptions) {
+function getRunTest (parser, identityOptions, extraGenerateOptions) {
     function testIdentity(code, syntax) {
         let actual, actual2, expected;
         const generateOptions = {
-            format: { semicolons: false }
+            format: { semicolons: false },
+            ...extraGenerateOptions
         };
         expect(function () {
             let tree = parser.parse(code, identityOptions);
@@ -31,7 +32,8 @@ function getRunTest (parser, identityOptions) {
     function testGenerate(expected, result) {
         const options = {
             indent: '    ',
-            parse: parser && parser.parse
+            parse: parser && parser.parse,
+            ...extraGenerateOptions
         };
 
         let actual;

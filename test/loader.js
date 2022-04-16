@@ -22,7 +22,7 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-import { generate, Precedence, attachComments, FORMAT_MINIFY, FORMAT_DEFAULTS } from '../src/escodegen-node.js';
+import { generate, CodeGenerator, Precedence, attachComments, FORMAT_MINIFY, FORMAT_DEFAULTS } from '../src/escodegen-node.js';
 
 // Make generate's first argument freezed.
 function freezing(escodegen) {
@@ -35,6 +35,6 @@ function freezing(escodegen) {
     return escodegen;
 }
 
-export default freezing({ generate, Precedence, attachComments, FORMAT_MINIFY, FORMAT_DEFAULTS });
+export default freezing({ generate, CodeGenerator, Precedence, attachComments, FORMAT_MINIFY, FORMAT_DEFAULTS });
 
 /* vim: set sw=4 ts=4 et tw=80 : */
