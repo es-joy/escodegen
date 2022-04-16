@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.2.1
+
+- fix: attempt to fix stale `dist` files
+
 ## 3.2.0
 
 - feat: allow supplying own `CodeGenerator` factory
