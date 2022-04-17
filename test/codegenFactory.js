@@ -13,6 +13,24 @@ const data = {
             }
         }
     },
+    'Codegen with jsdocBlocks (on Program)': {
+        '/** @tag1 {something} */ /** @tag2 {somethingElse} */ ': {
+            generateFrom: {
+                type: 'Program',
+                body: [],
+                jsdocBlocks: [
+                    {
+                        type: 'JsdocBlock',
+                        testingOnly: '/** @tag1 {something} */ '
+                    },
+                    {
+                        type: 'JsdocBlock',
+                        testingOnly: '/** @tag2 {somethingElse} */ '
+                    }
+                ]
+            }
+        }
+    },
     'Codegen with jsdoc on expression': {
         'var hi = /** @type {something} */ function () {\n};': {
             generateFrom: {

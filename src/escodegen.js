@@ -1695,6 +1695,13 @@ CodeGenerator.Statement = {
     Program (stmt, flags) {
         const iz = stmt.body.length;
         const result = [safeConcatenation && iz > 0 ? '\n' : ''];
+
+        if (stmt.jsdocBlocks) {
+            stmt.jsdocBlocks.forEach((jsdocBlock) => {
+                result.push(this[jsdocBlock.type](jsdocBlock));
+            });
+        }
+
         let bodyFlags = S_TFTF;
         for (let i = 0; i < iz; ++i) {
             if (!safeConcatenation && i === iz - 1) {

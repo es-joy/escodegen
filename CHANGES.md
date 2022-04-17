@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.4.0
+
+- feat: process any `jsdocBlocks` on `Program`
+
 ## 3.3.2
 
 - chore: stop minifying Node build
