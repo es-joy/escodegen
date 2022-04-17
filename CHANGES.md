@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.3.2
+
+- chore: stop minifying Node build
+
 ## 3.3.1
 
 - fix: for `jsdoc` on statements or expressions
