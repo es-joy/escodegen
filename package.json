@@ -28,7 +28,7 @@
         "dist",
         "package.json"
     ],
-    "version": "3.3.0",
+    "version": "3.3.1",
     "engines": {
         "node": ">=6.0"
     },
@@ -86,7 +86,8 @@
         "example-generate": "./bin/esgenerate.js benchmark/asts/backbone-0.5.3-ast.json",
         "build": "rollup -c",
         "lint": "eslint --rulesdir tools/rules/ .",
-        "unit-test": "c8 mocha --require chai/register-expect.js test/*.js --timeout 100000",
+        "mocha": "mocha --require chai/register-expect.js test/*.js --timeout 100000",
+        "unit-test": "c8 npm run mocha",
         "test": "npm run unit-test && npm run lint",
         "release": "node tools/release.js"
     }
