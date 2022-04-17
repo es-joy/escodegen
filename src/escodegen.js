@@ -1694,12 +1694,14 @@ CodeGenerator.Statement = {
 
     Program (stmt, flags) {
         const iz = stmt.body.length;
-        const result = [safeConcatenation && iz > 0 ? '\n' : ''];
+        const initialNewline = safeConcatenation && iz > 0;
+        const result = [initialNewline ? '\n' : ''];
 
         if (stmt.jsdocBlocks) {
             stmt.jsdocBlocks.forEach((jsdocBlock) => {
                 result.push(this[jsdocBlock.type](jsdocBlock));
             });
+            result.push('\n\n');
         }
 
         let bodyFlags = S_TFTF;

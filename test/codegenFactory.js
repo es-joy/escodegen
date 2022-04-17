@@ -14,7 +14,7 @@ const data = {
         }
     },
     'Codegen with jsdocBlocks (on Program)': {
-        '/** @tag1 {something} */ /** @tag2 {somethingElse} */ ': {
+        '/** @tag1 {something} */ /** @tag2 {somethingElse} */ \n\n': {
             generateFrom: {
                 type: 'Program',
                 body: [],

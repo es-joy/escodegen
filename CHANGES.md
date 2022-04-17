@@ -1,5 +1,10 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.4.1
+
+- fix: ensure JSDoc blocks are followed by two newlines to avoid accidental
+    associations
+
 ## 3.4.0
 
 - feat: process any `jsdocBlocks` on `Program`
