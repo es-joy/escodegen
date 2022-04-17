@@ -57,7 +57,7 @@ function getRollupObject ({ minifying, format = 'umd', browser = false } = {}) {
 
 export default [
     getRollupObject({ minifying: true, format: 'umd', browser: true }),
-    getRollupObject({ minifying: true, format: 'cjs' }),
+    getRollupObject({ minifying: false, format: 'cjs' }),
     getRollupObject({ minifying: true, format: 'esm', browser: true }),
     getRollupObject({ minifying: true, format: 'esm' })
 ];
