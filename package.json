@@ -88,7 +88,7 @@
         "lint": "eslint --rulesdir tools/rules/ .",
         "mocha": "mocha --require chai/register-expect.js test/*.js --timeout 100000",
         "unit-test": "c8 npm run mocha",
-        "test": "npm run unit-test && npm run lint",
+        "test": "npm run build && npm run unit-test && npm run lint",
         "release": "node tools/release.js"
     }
 }

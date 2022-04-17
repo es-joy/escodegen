@@ -23,5 +23,5 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-export * from '../src/escodegen.js';
+export * from './escodegen.js';
 export const browser = true;
