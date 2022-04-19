@@ -997,14 +997,25 @@ class CodeGenerator {
         }
 
         let result = this[type](expr, precedence, flags);
+        let typeCast;
         if (expr.jsdoc) {
+            typeCast = expr.jsdoc.tags.find((tag) => {
+                return tag.tag === 'type';
+            });
+            if (typeCast) {
+                result = ['(', result];
+            }
             result = addJsdoc(this[expr.jsdoc.type](expr.jsdoc), result);
         }
         if (extra.comment) {
             result = addComments(expr, result);
         }
 
-        return toSourceNodeWhenNeeded(result, expr);
+        if (typeCast) {
+            result.push(')');
+        }
+        result = toSourceNodeWhenNeeded(result, expr);
+        return result;
     }
 
     generateStatement (stmt, flags) {

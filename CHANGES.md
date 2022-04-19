@@ -1,5 +1,10 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.5.0
+
+- feat: for TypeScript-flavored JSDoc type casts, ensure following expression
+    wrapped in parentheses
+
 ## 3.4.1
 
 - fix: ensure JSDoc blocks are followed by two newlines to avoid accidental

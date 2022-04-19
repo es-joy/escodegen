@@ -21,18 +21,32 @@ const data = {
                 jsdocBlocks: [
                     {
                         type: 'JsdocBlock',
-                        testingOnly: '/** @tag1 {something} */ '
+                        tags: [
+                            {
+                                type: 'JsdocTag',
+                                tag: 'tag1',
+                                postTag: ' ',
+                                rawType: 'something'
+                            }
+                        ]
                     },
                     {
                         type: 'JsdocBlock',
-                        testingOnly: '/** @tag2 {somethingElse} */ '
+                        tags: [
+                            {
+                                type: 'JsdocTag',
+                                tag: 'tag2',
+                                postTag: ' ',
+                                rawType: 'somethingElse'
+                            }
+                        ]
                     }
                 ]
             }
         }
     },
     'Codegen with jsdoc on expression': {
-        'var hi = /** @type {something} */ function () {\n};': {
+        'var hi = /** @type {something} */ (function () {\n});': {
             generateFrom: {
                 type: 'VariableDeclaration',
                 declarations: [{
@@ -52,7 +66,14 @@ const data = {
                         params: [],
                         jsdoc: {
                             type: 'JsdocBlock',
-                            testingOnly: '/** @type {something} */ '
+                            tags: [
+                                {
+                                    type: 'JsdocTag',
+                                    tag: 'type',
+                                    postTag: ' ',
+                                    rawType: 'something'
+                                }
+                            ]
                         },
                         body: {
                             type: 'BlockStatement',
@@ -99,7 +120,14 @@ const data = {
                 },
                 jsdoc: {
                     type: 'JsdocBlock',
-                    testingOnly: '/** @type {hello} */ '
+                    tags: [
+                        {
+                            type: 'JsdocTag',
+                            tag: 'type',
+                            postTag: ' ',
+                            rawType: 'hello'
+                        }
+                    ]
                 },
                 params: [],
                 body: {
@@ -136,7 +164,8 @@ const runTest = getRunTest(null, {
 
         CodeGenerator.Statement.JsdocBlock =
             CodeGenerator.prototype.JsdocBlock = (stmt) => {
-                return stmt.testingOnly;
+                const [tag] = stmt.tags;
+                return `/** @${tag.tag}${tag.postTag}{${tag.rawType}} */ `;
             };
 
         return new CodeGenerator();
