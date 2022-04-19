@@ -999,9 +999,10 @@ class CodeGenerator {
         let result = this[type](expr, precedence, flags);
         let typeCast;
         if (expr.jsdoc) {
-            typeCast = expr.jsdoc.tags.find((tag) => {
-                return tag.tag === 'type';
-            });
+            typeCast = expr.type !== 'Property' && !expr.jsdoc.endLine &&
+                expr.jsdoc.tags.some((tag) => {
+                    return tag.tag === 'type';
+                });
             if (typeCast) {
                 result = ['(', result];
             }

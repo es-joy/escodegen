@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 3.5.1
+
+- fix: avoid parentheses around `Property` or multiline blocks
+
 ## 3.5.0
 
 - feat: for TypeScript-flavored JSDoc type casts, ensure following expression
