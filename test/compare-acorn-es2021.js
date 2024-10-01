@@ -27,7 +27,7 @@ import fs from 'fs';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as acorn from 'acorn';
-import chai from 'chai';
+import * as chai from 'chai';
 import chaiExclude from 'chai-exclude';
 import escodegen from './loader.js';
 

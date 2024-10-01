@@ -4544,7 +4544,6 @@ const data = {
                                 },
                                 init: {
                                     type: 'Literal',
-                                    // eslint-disable-next-line no-control-regex -- Needed for test
                                     value: {
                                         source: 'Here\u2028are\u2029some/very\nspecial\rcharacters\\\u2028for\\\nyou',
                                         toString () {
@@ -4575,7 +4574,6 @@ const data = {
                                 },
                                 init: {
                                     type: 'Literal',
-                                    // eslint-disable-next-line no-control-regex -- Needed for test
                                     value: {
                                         source: 'something',
                                         toString () {

@@ -2364,6 +2364,7 @@ CodeGenerator.Expression = {
                         return expr.raw;
                     }
                 }
+            // eslint-disable-next-line no-unused-vars -- Ok
             } catch (e) {
                 // not use raw property
             }
