@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## ?
+
+- chore: update optionator, source-map, and devDeps.
+
 ## 3.5.1
 
 - fix: avoid parentheses around `Property` or multiline blocks
