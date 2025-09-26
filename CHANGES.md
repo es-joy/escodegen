@@ -1,8 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
-## ?
+## 4.0.0
 
-- chore: update optionator, source-map, and devDeps.
+- feat: add TS support
+- chore: update optionator, estraverse, source-map, and devDeps.
 
 ## 3.5.1
 

@@ -37,37 +37,98 @@
 import * as estraverse from '@es-joy/estraverse';
 import * as esutils from 'esutils';
 
-let SourceNode,
-    base,
-    indent,
-    json,
-    renumber,
-    hexadecimal,
-    quotes,
-    escapeless,
-    newline,
-    space,
-    parentheses,
-    semicolons,
-    safeConcatenation,
-    directive,
-    extra,
-    parse,
-    sourceMap,
-    sourceCode,
-    preserveBlankLines,
-    codegenFactory;
+/** @type {typeof import('source-map').SourceNode} */
+let SourceNode;
+
+/** @type {string} */
+let base;
+
+/** @type {string} */
+let indent;
+
+/** @type {boolean} */
+let json;
+
+/** @type {boolean} */
+let renumber;
+
+/** @type {boolean} */
+let hexadecimal;
+
+/** @type {"double"|"single"|"auto"} */
+let quotes;
+
+/** @type {boolean} */
+let escapeless;
+
+// "\n"|""
+/** @type {string} */
+let newline;
+
+// " "|""
+/** @type {string} */
+let space;
+
+/** @type {boolean} */
+let parentheses;
+
+/** @type {boolean} */
+let semicolons;
+
+/** @type {boolean} */
+let safeConcatenation;
+
+/** @type {boolean} */
+let directive;
+
+/** @type {boolean} */
+let preserveBlankLines;
+
+/**
+ * @type {{
+ *   comment: boolean,
+ *   raw: boolean,
+ *   verbatim: null|string
+ *   moz: {
+ *     starlessGenerator: boolean,
+ *     comprehensionExpressionStartsWithAssignment: boolean
+ *   },
+ *   format: {
+ *     indent: {
+ *       adjustMultilineComment: boolean
+ *     }
+ *   }
+ * }}
+ */
+let extra;
+
+/** @type {null|((s: string) => import('estree').Program)} */
+let parse;
+
+/** @type {null|boolean|string} */
+let sourceMap;
+
+/** @type {string|null} */
+let sourceCode;
+
+let codegenFactory;
 
 const { Syntax } = estraverse;
 
-// Generation is done by generateExpression.
+/**
+ * Generation is done by generateExpression.
+ * @param {import('estree').Node} node
+ */
 function isExpression(node) {
-    return Object.prototype.hasOwnProperty.call(CodeGenerator.Expression, node.type);
+    return Object.hasOwn(CodeGenerator.Expression, node.type);
 }
 
-// Generation is done by generateStatement.
+/**
+ * Generation is done by generateStatement.
+ * @param {import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration} node
+ */
 function isStatement(node) {
-    return Object.prototype.hasOwnProperty.call(CodeGenerator.Statement, node.type);
+    return Object.hasOwn(CodeGenerator.Statement, node.type);
 }
 
 const Precedence = {
@@ -165,6 +226,8 @@ const S_TFFF = F_ALLOW_IN,
 function getDefaultOptions() {
     // default options
     return {
+        file: undefined,
+        sourceContent: undefined,
         indent: null,
         base: null,
         parse: null,
@@ -181,7 +244,7 @@ function getDefaultOptions() {
             json: false,
             renumber: false,
             hexadecimal: false,
-            quotes: 'single',
+            quotes: /** @type {"single"|"double"|"auto"} */ ('single'),
             escapeless: false,
             compact: false,
             parentheses: true,
@@ -203,6 +266,10 @@ function getDefaultOptions() {
     };
 }
 
+/**
+ * @param {string} str
+ * @param {number} num
+ */
 function stringRepeat(str, num) {
     let result = '';
 
@@ -215,23 +282,29 @@ function stringRepeat(str, num) {
     return result;
 }
 
+/**
+ * @param {string} str
+ */
 function hasLineTerminator(str) {
     return (/[\r\n]/g).test(str);
 }
 
+/**
+ * @param {string} str
+ */
 function endsWithLineTerminator(str) {
     const len = str.length;
     return len && esutils.code.isLineTerminator(str.charCodeAt(len - 1));
 }
 
-function merge(target, override) {
-    for (const [key, val] of Object.entries(override)) {
-        target[key] = val;
-    }
-    return target;
-}
-
+/**
+ * @param {any} target
+ * @param {any} override
+ */
 function updateDeeply(target, override) {
+    /**
+     * @param {any} target
+     */
     function isHashObject(target) {
         return typeof target === 'object' && target instanceof Object && !(target instanceof RegExp);
     }
@@ -250,6 +323,9 @@ function updateDeeply(target, override) {
     return target;
 }
 
+/**
+ * @param {number} value
+ */
 function generateNumber(value) {
     if (value !== value) {
         throw new Error('Numeric literal whose value is NaN');
@@ -304,9 +380,12 @@ function generateNumber(value) {
     return result;
 }
 
-// Generate valid RegExp expression.
-// This function is based on https://github.com/Constellation/iv Engine
-
+/**
+ * Generate valid RegExp expression.
+ * This function is based on https://github.com/Constellation/iv Engine
+ * @param {number} ch
+ * @param {boolean} previousIsBackslash
+ */
 function escapeRegExpCharacter(ch, previousIsBackslash) {
     // not handling '\' and handling \u2028 or \u2029 to unicode escape sequence
     if ((ch & ~1) === 0x2028) {
@@ -318,6 +397,9 @@ function escapeRegExpCharacter(ch, previousIsBackslash) {
     return String.fromCharCode(ch);
 }
 
+/**
+ * @param {RegExp} reg
+ */
 function generateRegExp(reg) {
     let result = reg.toString();
 
@@ -364,6 +446,10 @@ function generateRegExp(reg) {
     return result;
 }
 
+/**
+ * @param {number} code
+ * @param {number} next
+ */
 function escapeAllowedCharacter(code, next) {
     if (code === 0x08  /* \b */) {
         return '\\b';
@@ -389,6 +475,9 @@ function escapeAllowedCharacter(code, next) {
     }
 }
 
+/**
+ * @param {number} code
+ */
 function escapeDisallowedCharacter(code) {
     if (code === 0x5C  /* \ */) {
         return '\\\\';
@@ -413,6 +502,9 @@ function escapeDisallowedCharacter(code) {
     throw new Error('Incorrectly classified character');
 }
 
+/**
+ * @param {string} str
+ */
 function escapeDirective(str) {
     let quote = quotes === 'double' ? '"' : '\'';
     for (let i = 0, iz = str.length; i < iz; ++i) {
@@ -431,6 +523,9 @@ function escapeDirective(str) {
     return quote + str + quote;
 }
 
+/**
+ * @param {string} str
+ */
 function escapeString(str) {
     let result = '', singleQuotes = 0, doubleQuotes = 0;
 
@@ -474,9 +569,10 @@ function escapeString(str) {
 }
 
 /**
-     * flatten an array to a string, where the array can contain
-     * either strings or nested arrays
-     */
+ * flatten an array to a string, where the array can contain
+ * either strings or nested arrays
+ * @param {any[]} arr
+ */
 function flattenToString(arr) {
     let result = '';
     for (const elem of arr) {
@@ -486,8 +582,12 @@ function flattenToString(arr) {
 }
 
 /**
-     * convert generated to a SourceNode when source maps are enabled.
-     */
+ * convert generated to a SourceNode when source maps are enabled.
+ * @param {(
+ *   string | import('source-map').SourceNode | NestedStringArray
+ * )[] | import('source-map').SourceNode | string} generated
+ * @param {import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration|null|undefined} [node]
+ */
 function toSourceNodeWhenNeeded(generated, node) {
     if (!sourceMap) {
         // with no source maps, generated is either an
@@ -498,22 +598,51 @@ function toSourceNodeWhenNeeded(generated, node) {
         }
         return generated;
     }
-    if (node == null) {
+
+    /** @type {import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration|{loc?: null, name?: null}|null|undefined} */
+    let checkNode = node;
+    if (checkNode == null) {
         if (generated instanceof SourceNode) {
             return generated;
         }
-        node = {};
+        checkNode = {};
     }
-    if (node.loc == null) {
-        return new SourceNode(null, null, sourceMap, generated, node.name || null);
+    if (checkNode.loc == null) {
+        return new SourceNode(
+            null,
+            null,
+            /** @type {string} */ (sourceMap),
+            /** @type {string | import('source-map').SourceNode | (string|import('source-map').SourceNode)[]} */
+            (generated),
+            /* c8 ignore next -- Guard */
+            ('name' in checkNode && checkNode.name) || undefined
+        );
     }
-    return new SourceNode(node.loc.start.line, node.loc.start.column, (sourceMap === true ? node.loc.source || null : sourceMap), generated, node.name || null);
+    return new SourceNode(
+        checkNode.loc.start.line,
+        checkNode.loc.start.column,
+        (sourceMap === true ? checkNode.loc.source || null : sourceMap),
+        /** @type {string | import('source-map').SourceNode | (string|import('source-map').SourceNode)[]} */
+        (generated),
+        ('name' in checkNode && checkNode.name) || undefined
+    );
 }
 
 function noEmptySpace() {
     return space || ' ';
 }
 
+/**
+ * @typedef {StringOrSourceNodeOrArray[]} StringOrSourceNodeOrArrayArray
+ */
+/**
+ * @typedef {string|import('source-map').SourceNode|(string|import('source-map').SourceNode|StringOrSourceNodeOrArrayArray)[]} StringOrSourceNodeOrArray
+ */
+
+/**
+ * @param {StringOrSourceNodeOrArray} left
+ * @param {StringOrSourceNodeOrArray} right
+ */
 function join(left, right) {
     const leftSource = toSourceNodeWhenNeeded(left).toString();
     if (leftSource.length === 0) {
@@ -541,10 +670,16 @@ function join(left, right) {
     return [left, space, right];
 }
 
+/**
+ * @param {string|NestedStringArray|import('source-map').SourceNode} stmt
+ */
 function addIndent(stmt) {
     return [base, stmt];
 }
 
+/**
+ * @param {(s: string) => void} fn
+ */
 function withIndent(fn) {
     const previousBase = base;
     base += indent;
@@ -552,6 +687,9 @@ function withIndent(fn) {
     base = previousBase;
 }
 
+/**
+ * @param {string} str
+ */
 function calculateSpaces(str) {
     let i;
     for (i = str.length - 1; i >= 0; --i) {
@@ -562,6 +700,10 @@ function calculateSpaces(str) {
     return (str.length - 1) - i;
 }
 
+/**
+ * @param {string} value
+ * @param {string} [specialBase]
+ */
 function adjustMultilineComment(value, specialBase) {
     const array = value.split(/\r\n|[\r\n]/);
     let spaces = Number.MAX_VALUE;
@@ -605,7 +747,7 @@ function adjustMultilineComment(value, specialBase) {
 
     for (let i = 1, len = array.length; i < len; ++i) {
         const sn = toSourceNodeWhenNeeded(addIndent(array[i].slice(spaces)));
-        array[i] = sourceMap ? sn.join('') : sn;
+        array[i] = /** @type {string} */ (sn);
     }
 
     base = previousBase;
@@ -613,6 +755,10 @@ function adjustMultilineComment(value, specialBase) {
     return array.join('\n');
 }
 
+/**
+ * @param {import('estree').Comment} comment
+ * @param {string} [specialBase]
+ */
 function generateComment(comment, specialBase) {
     if (comment.type === 'Line') {
         if (endsWithLineTerminator(comment.value)) {
@@ -632,10 +778,22 @@ function generateComment(comment, specialBase) {
     return `/*${comment.value}*/`;
 }
 
+/**
+ * @param {string} stmt
+ * @param {string} result
+ */
 function addJsdoc (stmt, result) {
     return [stmt, result];
 }
 
+/**
+ * @typedef {(string|import('source-map').SourceNode|NestedStringArray)[]} NestedStringArray
+ */
+
+/**
+ * @param {import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration} stmt
+ * @param {NestedStringArray} result
+ */
 function addComments(stmt, result) {
     if (stmt.leadingComments && stmt.leadingComments.length > 0) {
         const save = result;
@@ -644,10 +802,16 @@ function addComments(stmt, result) {
             const [comment] = stmt.leadingComments;
             result = [];
 
+            /** @type {[number, number]} */
+            // @ts-expect-error Extended estree
             const extRange = comment.extendedRange;
-            let { range } = comment;
 
-            const prefix = sourceCode.substring(extRange[0], range[0]);
+            /** @type {[number, number]} */
+            // @ts-expect-error Extended estree
+            // eslint-disable-next-line prefer-destructuring -- TS
+            let range = comment.range;
+
+            const prefix = /** @type {string} */ (sourceCode).substring(extRange[0], range[0]);
             let count = (prefix.match(/\n/g) || []).length;
             if (count > 0) {
                 result.push(stringRepeat('\n', count));
@@ -661,9 +825,10 @@ function addComments(stmt, result) {
 
             for (let i = 1, len = stmt.leadingComments.length; i < len; i++) {
                 const comment = stmt.leadingComments[i];
+                // @ts-expect-error Extended estree
                 ({ range } = comment);
 
-                const infix = sourceCode.substring(prevRange[1], range[0]);
+                const infix = /** @type {string} */ (sourceCode).substring(prevRange[1], range[0]);
                 count = (infix.match(/\n/g) || []).length;
                 result.push(stringRepeat('\n', count));
                 result.push(addIndent(generateComment(comment)));
@@ -671,13 +836,15 @@ function addComments(stmt, result) {
                 prevRange = range;
             }
 
-            const suffix = sourceCode.substring(range[1], extRange[1]);
+            const suffix = /** @type {string} */ (sourceCode).substring(range[1], extRange[1]);
             count = (suffix.match(/\n/g) || []).length;
             result.push(stringRepeat('\n', count));
         } else {
             const [comment] = stmt.leadingComments;
             result = [];
-            if (safeConcatenation && stmt.type === Syntax.Program && stmt.body.length === 0) {
+            if (safeConcatenation && stmt.type === Syntax.Program &&
+                /** @type {import('estree').Program} */
+                (/** @type {unknown} */ (stmt)).body.length === 0) {
                 result.push('\n');
             }
             result.push(generateComment(comment));
@@ -702,10 +869,17 @@ function addComments(stmt, result) {
 
         if (preserveBlankLines) {
             const [comment] = stmt.trailingComments;
-            const extRange = comment.extendedRange;
-            const { range } = comment;
 
-            const prefix = sourceCode.substring(extRange[0], range[0]);
+            /** @type {[number, number]} */
+            // @ts-expect-error Extended estree
+            const extRange = comment.extendedRange;
+
+            /** @type {[number, number]} */
+            // @ts-expect-error Extended estree
+            // eslint-disable-next-line prefer-destructuring -- TS
+            const range = comment.range;
+
+            const prefix = /** @type {string} */ (sourceCode).substring(extRange[0], range[0]);
             const count = (prefix.match(/\n/g) || []).length;
 
             if (count > 0) {
@@ -747,11 +921,16 @@ function addComments(stmt, result) {
     return result;
 }
 
+/**
+ * @param {number} start
+ * @param {number} end
+ * @param {NestedStringArray} result
+ */
 function generateBlankLines(start, end, result) {
     let newlineCount = 0;
 
     for (let j = start; j < end; j++) {
-        if (sourceCode[j] === '\n') {
+        if (/** @type {string} */ (sourceCode)[j] === '\n') {
             newlineCount++;
         }
     }
@@ -761,6 +940,11 @@ function generateBlankLines(start, end, result) {
     }
 }
 
+/**
+ * @param {StringOrSourceNodeOrArray} text
+ * @param {number} current
+ * @param {number} should
+ */
 function parenthesize(text, current, should) {
     if (current < should) {
         return ['(', text, ')'];
@@ -768,6 +952,9 @@ function parenthesize(text, current, should) {
     return text;
 }
 
+/**
+ * @param {string} string
+ */
 function generateVerbatimString(string) {
     const result = string.split(/\r\n|\n/);
     for (let i = 1, iz = result.length; i < iz; i++) {
@@ -776,284 +963,119 @@ function generateVerbatimString(string) {
     return result;
 }
 
+/**
+ * @param {import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration} expr
+ * @param {number|undefined} precedence
+ */
 function generateVerbatim(expr, precedence) {
-    const verbatim = expr[extra.verbatim];
+    const verbatim =
+        /**
+         * @type {string|{
+         *   content: string,
+         *   precedence: number
+         * }}
+         */ (
+            expr[/** @type {keyof expr} */ (extra.verbatim)]
+        );
+
+    /* c8 ignore next 3 -- TS */
+    if (!verbatim) {
+        throw new Error('Unexpected falsy verbatim');
+    }
 
     let result;
     if (typeof verbatim === 'string') {
-        result = parenthesize(generateVerbatimString(verbatim), Precedence.Sequence, precedence);
+        result = parenthesize(
+            generateVerbatimString(verbatim),
+            Precedence.Sequence,
+            /** @type {number} */
+            (precedence)
+        );
     } else {
         // verbatim is object
         result = generateVerbatimString(verbatim.content);
         const prec = (verbatim.precedence != null) ? verbatim.precedence : Precedence.Sequence;
-        result = parenthesize(result, prec, precedence);
+        result = parenthesize(
+            result,
+            prec,
+            /** @type {number} */
+            (precedence)
+        );
     }
 
     return toSourceNodeWhenNeeded(result, expr);
 }
 
+/**
+ * @param {import('estree').Identifier|import('estree').PrivateIdentifier} node
+ */
 function generateIdentifier(node) {
     return toSourceNodeWhenNeeded(node.name, node);
 }
 
+/**
+ * @param {import('estree').Node} node
+ * @param {boolean} spaceRequired
+ */
 function generateAsyncPrefix(node, spaceRequired) {
-    return node.async ? `async${spaceRequired ? noEmptySpace() : space}` : '';
+    return 'async' in node && node.async
+        ? `async${spaceRequired ? noEmptySpace() : space}`
+        : '';
 }
 
+/**
+ * @param {import('estree').FunctionDeclaration|import('estree').FunctionExpression} node
+ */
 function generateStarSuffix(node) {
     const isGenerator = node.generator && !extra.moz.starlessGenerator;
     return isGenerator ? `*${space}` : '';
 }
 
+/**
+ * @param {import('estree').MethodDefinition|import('estree').Property} prop
+ */
 function generateMethodPrefix(prop) {
     const func = prop.value;
 
     let prefix = '';
-    if (func.async) {
+    if ('async' in func && func.async) {
         prefix += generateAsyncPrefix(func, !prop.computed);
     }
-    if (func.generator) {
+    if ('generator' in func && func.generator) {
         // avoid space before method name
-        prefix += generateStarSuffix(func) ? '*' : '';
+        prefix += generateStarSuffix(
+            /** @type {import('estree').FunctionExpression | import('estree').FunctionDeclaration} */
+            (func)
+        ) ? '*' : '';
     }
     return prefix;
 }
 
-class CodeGenerator {
+const Statement = {
+    /** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)|null} */
+    JsdocBlock: null,
 
-    // Helpers.
-
-    maybeBlock (stmt, flags) {
-        const noLeadingComment = !extra.comment || !stmt.leadingComments;
-
-        if (stmt.type === Syntax.BlockStatement && noLeadingComment) {
-            return [space, this.generateStatement(stmt, flags)];
-        }
-
-        if (stmt.type === Syntax.EmptyStatement && noLeadingComment) {
-            return ';';
-        }
-
-        const that = this;
-        let result;
-        withIndent(function () {
-            result = [
-                newline,
-                addIndent(that.generateStatement(stmt, flags))
-            ];
-        });
-
-        return result;
-    }
-
-    maybeBlockSuffix (stmt, result) {
-        const ends = endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString());
-        if (stmt.type === Syntax.BlockStatement && (!extra.comment || !stmt.leadingComments) && !ends) {
-            return [result, space];
-        }
-        if (ends) {
-            return [result, base];
-        }
-        return [result, newline, base];
-    }
-
-    generatePattern (node, precedence, flags) {
-        if (node.type === Syntax.Identifier) {
-            return generateIdentifier(node);
-        }
-        return this.generateExpression(node, precedence, flags);
-    }
-
-    generateFunctionParams (node) {
-        let result;
-        if (node.type === Syntax.ArrowFunctionExpression &&
-                    !node.rest && (!node.defaults || node.defaults.length === 0) &&
-                    node.params.length === 1 && node.params[0].type === Syntax.Identifier) {
-            // arg => { } case
-            result = [generateAsyncPrefix(node, true), generateIdentifier(node.params[0])];
-        } else {
-            result = node.type === Syntax.ArrowFunctionExpression ? [generateAsyncPrefix(node, false)] : [];
-            result.push('(');
-
-            let hasDefault = false;
-            if (node.defaults) {
-                hasDefault = true;
-            }
-            for (let i = 0, iz = node.params.length; i < iz; ++i) {
-                if (hasDefault && node.defaults[i]) {
-                    // Handle default values.
-                    result.push(this.generateAssignment(node.params[i], node.defaults[i], '=', Precedence.Assignment, E_TTT));
-                } else {
-                    result.push(this.generatePattern(node.params[i], Precedence.Assignment, E_TTT));
-                }
-                if (i + 1 < iz) {
-                    result.push(`,${space}`);
-                }
-            }
-
-            if (node.rest) {
-                if (node.params.length) {
-                    result.push(`,${space}`);
-                }
-                result.push('...');
-                result.push(generateIdentifier(node.rest));
-            }
-
-            result.push(')');
-        }
-
-        return result;
-    }
-
-    generateFunctionBody (node) {
-        const result = this.generateFunctionParams(node);
-
-        if (node.type === Syntax.ArrowFunctionExpression) {
-            result.push(space);
-            result.push('=>');
-        }
-
-        if (node.expression) {
-            result.push(space);
-            let expr = this.generateExpression(node.body, Precedence.Assignment, E_TTT);
-            if (expr.toString().charAt(0) === '{') {
-                expr = ['(', expr, ')'];
-            }
-            result.push(expr);
-        } else {
-            result.push(this.maybeBlock(node.body, S_TTFF));
-        }
-
-        return result;
-    }
-
-    generateIterationForStatement (operator, stmt, flags) {
-        const that = this;
-        let result = [`for${stmt.await ? `${noEmptySpace()}await` : ''}${space}(`];
-        withIndent(function () {
-            if (stmt.left.type === Syntax.VariableDeclaration) {
-                withIndent(function () {
-                    result.push(stmt.left.kind + noEmptySpace());
-                    result.push(that.generateStatement(stmt.left.declarations[0], S_FFFF));
-                });
-            } else {
-                result.push(that.generateExpression(stmt.left, Precedence.Call, E_TTT));
-            }
-
-            result = join(result, operator);
-            result = [join(
-                result,
-                that.generateExpression(stmt.right, Precedence.Assignment, E_TTT)
-            ), ')'];
-        });
-        result.push(this.maybeBlock(stmt.body, flags));
-        return result;
-    }
-
-    generatePropertyKey (expr, computed) {
-        const result = [];
-
-        if (computed) {
-            result.push('[');
-        }
-
-        result.push(this.generateExpression(expr, Precedence.Assignment, E_TTT));
-
-        if (computed) {
-            result.push(']');
-        }
-
-        return result;
-    }
-
-    generateAssignment (left, right, operator, precedence, flags) {
-        if (Precedence.Assignment < precedence) {
-            flags |= F_ALLOW_IN;
-        }
-
-        return parenthesize(
-            [
-                this.generateExpression(left, Precedence.Call, flags),
-                space + operator + space,
-                this.generateExpression(right, Precedence.Assignment, flags)
-            ],
-            Precedence.Assignment,
-            precedence
-        );
-    }
-
-    semicolon (flags) {
-        if (!semicolons && flags & F_SEMICOLON_OPT) {
-            return '';
-        }
-        return ';';
-    }
-
-    generateExpression (expr, precedence, flags) {
-        const type = expr.type || Syntax.Property;
-
-        if (extra.verbatim && Object.prototype.hasOwnProperty.call(expr, extra.verbatim)) {
-            return generateVerbatim(expr, precedence);
-        }
-
-        let result = this[type](expr, precedence, flags);
-        let typeCast;
-        if (expr.jsdoc) {
-            typeCast = expr.type !== 'Property' && !expr.jsdoc.endLine &&
-                expr.jsdoc.tags.some((tag) => {
-                    return tag.tag === 'type';
-                });
-            if (typeCast) {
-                result = ['(', result];
-            }
-            result = addJsdoc(this[expr.jsdoc.type](expr.jsdoc), result);
-        }
-        if (extra.comment) {
-            result = addComments(expr, result);
-        }
-
-        if (typeCast) {
-            result.push(')');
-        }
-        result = toSourceNodeWhenNeeded(result, expr);
-        return result;
-    }
-
-    generateStatement (stmt, flags) {
-        let result = this[stmt.type](stmt, flags);
-        if (stmt.jsdoc) {
-            result = addJsdoc(this[stmt.jsdoc.type](stmt.jsdoc), result);
-        }
-
-        // Attach comments
-
-        if (extra.comment) {
-            result = addComments(stmt, result);
-        }
-
-        const fragment = toSourceNodeWhenNeeded(result).toString();
-        if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
-            result = sourceMap ? toSourceNodeWhenNeeded(result).replaceRight(/\s+$/, '') : fragment.replace(/\s+$/, '');
-        }
-
-        return toSourceNodeWhenNeeded(result, stmt);
-    }
-}
-
-// Statements.
-
-CodeGenerator.Statement = {
-
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').BlockStatement} stmt
+     * @param {number} flags
+     */
     BlockStatement (stmt, flags) {
         const that = this;
+        /** @type {NestedStringArray} */
         let result = ['{', newline];
 
         withIndent(function () {
             // handle functions without any code
             if (stmt.body.length === 0 && preserveBlankLines) {
-                const { range } = stmt;
+                /** @type {[number, number]} */
+                // @ts-expect-error Extended estree
+                // eslint-disable-next-line prefer-destructuring -- TS
+                const range = stmt.range;
                 if (range[1] - range[0] > 2) {
-                    const content = sourceCode.substring(range[0] + 1, range[1] - 1);
+                    const content = /** @type {string} */ (
+                        sourceCode
+                    ).substring(range[0] + 1, range[1] - 1);
                     if (content[0] === '\n') {
                         result = ['{'];
                     }
@@ -1071,21 +1093,41 @@ CodeGenerator.Statement = {
                     // handle spaces before the first line
                     if (i === 0) {
                         if (stmt.body[0].leadingComments) {
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
                             const range = stmt.body[0].leadingComments[0].extendedRange;
-                            const content = sourceCode.substring(range[0], range[1]);
+                            const content = /** @type {string} */ (
+                                sourceCode
+                            ).substring(range[0], range[1]);
                             if (content[0] === '\n') {
                                 result = ['{'];
                             }
                         }
                         if (!stmt.body[0].leadingComments) {
-                            generateBlankLines(stmt.range[0], stmt.body[0].range[0], result);
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
+                            // eslint-disable-next-line prefer-destructuring -- TS
+                            const range = stmt.range;
+
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
+                            const bodyItemRange = stmt.body[0].range;
+                            generateBlankLines(range[0], bodyItemRange[0], result);
                         }
                     }
 
                     // handle spaces between lines
                     if (i > 0) {
                         if (!stmt.body[i - 1].trailingComments  && !stmt.body[i].leadingComments) {
-                            generateBlankLines(stmt.body[i - 1].range[1], stmt.body[i].range[0], result);
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
+                            const bodyItemRangePrev = stmt.body[i - 1].range;
+
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
+                            const bodyItemRange = stmt.body[i].range;
+
+                            generateBlankLines(bodyItemRangePrev[1], bodyItemRange[0], result);
                         }
                     }
                 }
@@ -1118,7 +1160,15 @@ CodeGenerator.Statement = {
                     // handle spaces after the last line
                     if (i === iz - 1) {
                         if (!stmt.body[i].trailingComments) {
-                            generateBlankLines(stmt.body[i].range[1], stmt.range[1], result);
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
+                            // eslint-disable-next-line prefer-destructuring -- TS
+                            const range = stmt.range;
+
+                            /** @type {[number, number]} */
+                            // @ts-expect-error Extended estree
+                            const bodyItemRange = stmt.body[i].range;
+                            generateBlankLines(bodyItemRange[1], range[1], result);
                         }
                     }
                 }
@@ -1129,6 +1179,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').BreakStatement} stmt
+     * @param {number} flags
+     */
     BreakStatement (stmt, flags) {
         if (stmt.label) {
             return `break ${stmt.label.name}${this.semicolon(flags)}`;
@@ -1136,6 +1191,11 @@ CodeGenerator.Statement = {
         return `break${this.semicolon(flags)}`;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ContinueStatement} stmt
+     * @param {number} flags
+     */
     ContinueStatement (stmt, flags) {
         if (stmt.label) {
             return `continue ${stmt.label.name}${this.semicolon(flags)}`;
@@ -1143,8 +1203,15 @@ CodeGenerator.Statement = {
         return `continue${this.semicolon(flags)}`;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ClassBody} stmt
+     * @param {number} flags
+     */
     ClassBody (stmt, flags) {
-        const result = [ '{', newline], that = this;
+        /** @type {NestedStringArray} */
+        const result = [ '{', newline];
+        const that = this;
 
         withIndent(function (indent) {
             for (let i = 0, iz = stmt.body.length; i < iz; ++i) {
@@ -1164,8 +1231,13 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ClassDeclaration} stmt
+     * @param {number} flags
+     */
     ClassDeclaration (stmt, flags) {
-        let result  = ['class'];
+        let result  = /** @type {NestedStringArray} */ (['class']);
         if (stmt.id) {
             result = join(result, this.generateExpression(stmt.id, Precedence.Sequence, E_TTT));
         }
@@ -1178,6 +1250,14 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').Node & {
+     *   raw?: string,
+     *   directive: string
+     * }} stmt
+     * @param {number} flags
+     */
     DirectiveStatement (stmt, flags) {
         if (extra.raw && stmt.raw) {
             return stmt.raw + this.semicolon(flags);
@@ -1185,6 +1265,11 @@ CodeGenerator.Statement = {
         return escapeDirective(stmt.directive) + this.semicolon(flags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').DoWhileStatement} stmt
+     * @param {number} flags
+     */
     DoWhileStatement (stmt, flags) {
         // Because `do 42 while (cond)` is Syntax Error. We need semicolon.
         let result = join('do', this.maybeBlock(stmt.body, S_TFFF));
@@ -1196,9 +1281,17 @@ CodeGenerator.Statement = {
         ]);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').CatchClause & {
+     *   guard: import('estree').BinaryExpression
+     * }} stmt
+     * @param {number} flags
+     */
     CatchClause (stmt, flags) {
         const that = this;
-        let result;
+        /** @type {NestedStringArray} */
+        let result = [];
         withIndent(function () {
             let guard;
 
@@ -1221,17 +1314,32 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').DebuggerStatement} stmt
+     * @param {number} flags
+     */
     DebuggerStatement (stmt, flags) {
         return `debugger${this.semicolon(flags)}`;
     },
 
+    /**
+     * @param {import('estree').EmptyStatement} stmt
+     * @param {number} flags
+     */
     EmptyStatement (stmt, flags) {
         return ';';
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ExportDefaultDeclaration} stmt
+     * @param {number} flags
+     */
     ExportDefaultDeclaration (stmt, flags) {
         const bodyFlags = (flags & F_SEMICOLON_OPT) ? S_TFFT : S_TFFF;
 
+        /** @type {NestedStringArray} */
         let result = [ 'export' ];
 
         // export default HoistableDeclaration[Default]
@@ -1245,11 +1353,17 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ExportNamedDeclaration} stmt
+     * @param {number} flags
+     */
     ExportNamedDeclaration (stmt, flags) {
         const that = this;
 
         const bodyFlags = (flags & F_SEMICOLON_OPT) ? S_TFFT : S_TFFF;
 
+        /** @type {NestedStringArray} */
         let result = [ 'export' ];
 
         // export VariableStatement
@@ -1295,6 +1409,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ExportAllDeclaration} stmt
+     * @param {number} flags
+     */
     ExportAllDeclaration (stmt, flags) {
         // export * FromClause ;
         return [
@@ -1307,7 +1426,15 @@ CodeGenerator.Statement = {
         ];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ExpressionStatement} stmt
+     * @param {number} flags
+     */
     ExpressionStatement (stmt, flags) {
+        /**
+         * @param {string} fragment
+         */
         function isClassPrefixed(fragment) {
             if (fragment.slice(0, 5) !== 'class') {
                 return false;
@@ -1316,6 +1443,9 @@ CodeGenerator.Statement = {
             return code === 0x7B  /* '{' */ || esutils.code.isWhiteSpace(code) || esutils.code.isLineTerminator(code);
         }
 
+        /**
+         * @param {string} fragment
+         */
         function isFunctionPrefixed(fragment) {
             if (fragment.slice(0, 8) !== 'function') {
                 return false;
@@ -1324,6 +1454,9 @@ CodeGenerator.Statement = {
             return code === 0x28 /* '(' */ || esutils.code.isWhiteSpace(code) || code === 0x2A  /* '*' */ || esutils.code.isLineTerminator(code);
         }
 
+        /**
+         * @param {string} fragment
+         */
         function isAsyncPrefixed(fragment) {
             if (fragment.slice(0, 5) !== 'async') {
                 return false;
@@ -1347,6 +1480,7 @@ CodeGenerator.Statement = {
             return code === 0x28 /* '(' */ || esutils.code.isWhiteSpace(code) || code === 0x2A  /* '*' */ || esutils.code.isLineTerminator(code);
         }
 
+        /** @type {NestedStringArray} */
         let result = [this.generateExpression(stmt.expression, Precedence.Sequence, E_TTT)];
         // 12.4 '{', 'function', 'class' is not allowed in this position.
         // wrap expression with parentheses
@@ -1355,7 +1489,8 @@ CodeGenerator.Statement = {
                     isClassPrefixed(fragment) ||
                     isFunctionPrefixed(fragment) ||
                     isAsyncPrefixed(fragment) ||
-                    (directive && (flags & F_DIRECTIVE_CTX) && stmt.expression.type === Syntax.Literal && typeof stmt.expression.value === 'string')) {
+                    (directive && (flags & F_DIRECTIVE_CTX) && stmt.expression.type === Syntax.Literal &&
+                        typeof (/** @type {import('estree').Literal} */ (stmt.expression)).value === 'string')) {
             result = ['(', result, `)${this.semicolon(flags)}`];
         } else {
             result.push(this.semicolon(flags));
@@ -1363,6 +1498,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ImportDeclaration} stmt
+     * @param {number} flags
+     */
     ImportDeclaration (stmt, flags) {
         // ES6: 15.2.1 valid import declarations:
         //     - import ImportClause FromClause ;
@@ -1384,6 +1524,8 @@ CodeGenerator.Statement = {
         }
 
         // import ImportClause FromClause ;
+
+        /** @type {NestedStringArray} */
         let result = [
             'import'
         ];
@@ -1449,6 +1591,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').VariableDeclarator} stmt
+     * @param {number} flags
+     */
     VariableDeclarator (stmt, flags) {
         const itemFlags = (flags & F_ALLOW_IN) ? E_TTT : E_FTT;
         if (stmt.init) {
@@ -1463,12 +1610,18 @@ CodeGenerator.Statement = {
         return this.generatePattern(stmt.id, Precedence.Assignment, itemFlags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').VariableDeclaration} stmt
+     * @param {number} flags
+     */
     VariableDeclaration (stmt, flags) {
         // VariableDeclarator is typed as Statement,
         // but joined with comma (not LineTerminator).
         // So if comment is attached to target node, we should specialize.
         const that = this;
 
+        /** @type {NestedStringArray} */
         const result = [ stmt.kind ];
 
         const bodyFlags = (flags & F_ALLOW_IN) ? S_TFFF : S_FFFF;
@@ -1506,6 +1659,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ThrowStatement} stmt
+     * @param {number} flags
+     */
     ThrowStatement (stmt, flags) {
         return [join(
             'throw',
@@ -1513,7 +1671,16 @@ CodeGenerator.Statement = {
         ), this.semicolon(flags)];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').TryStatement & {
+     *   handlers?: (import('estree').CatchClause)[],
+     *   guardedHandlers?: (import('estree').CatchClause)[],
+     * }} stmt
+     * @param {number} flags
+     */
     TryStatement (stmt, flags) {
+        /** @type {NestedStringArray} */
         let result = ['try', this.maybeBlock(stmt.block, S_TFFF)];
         result = this.maybeBlockSuffix(stmt.block, result);
 
@@ -1558,9 +1725,14 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').SwitchStatement} stmt
+     * @param {number} flags
+     */
     SwitchStatement (stmt, flags) {
         const that = this;
-        let result;
+        let result = [];
         withIndent(function () {
             result = [
                 `switch${space}(`,
@@ -1585,6 +1757,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').SwitchCase} stmt
+     * @param {number} flags
+     */
     SwitchCase (stmt, flags) {
         const that = this;
         let result;
@@ -1625,9 +1802,16 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').IfStatement} stmt
+     * @param {number} flags
+     */
     IfStatement (stmt, flags) {
         const that = this;
-        let result;
+
+        /** @type {NestedStringArray} */
+        let result = [];
         withIndent(function () {
             result = [
                 `if${space}(`,
@@ -1654,9 +1838,16 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ForStatement} stmt
+     * @param {number} flags
+     */
     ForStatement (stmt, flags) {
         const that = this;
-        let result;
+
+        /** @type {NestedStringArray} */
+        let result = [];
         withIndent(function () {
             result = [`for${space}(`];
             if (stmt.init) {
@@ -1692,26 +1883,53 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ForInStatement} stmt
+     * @param {number} flags
+     */
     ForInStatement (stmt, flags) {
         return this.generateIterationForStatement('in', stmt, flags & F_SEMICOLON_OPT ? S_TFFT : S_TFFF);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ForOfStatement} stmt
+     * @param {number} flags
+     */
     ForOfStatement (stmt, flags) {
         return this.generateIterationForStatement('of', stmt, flags & F_SEMICOLON_OPT ? S_TFFT : S_TFFF);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').LabeledStatement} stmt
+     * @param {number} flags
+     */
     LabeledStatement (stmt, flags) {
         return [`${stmt.label.name}:`, this.maybeBlock(stmt.body, flags & F_SEMICOLON_OPT ? S_TFFT : S_TFFF)];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').Program} stmt
+     * @param {number} flags
+     */
     Program (stmt, flags) {
         const iz = stmt.body.length;
         const initialNewline = safeConcatenation && iz > 0;
+
+        /** @type {NestedStringArray} */
         const result = [initialNewline ? '\n' : ''];
 
-        if (stmt.jsdocBlocks) {
-            stmt.jsdocBlocks.forEach((jsdocBlock) => {
-                result.push(this[jsdocBlock.type](jsdocBlock));
+        if ('jsdocBlocks' in stmt && stmt.jsdocBlocks) {
+            /** @type {import('@es-joy/jsdoccomment').JsdocBlock[]} */
+            (stmt.jsdocBlocks).forEach((jsdocBlock) => {
+                result.push(
+                    /** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)} */ (
+                        this.JsdocBlock
+                    )(jsdocBlock)
+                );
             });
             result.push('\n\n');
         }
@@ -1726,14 +1944,29 @@ CodeGenerator.Statement = {
                 // handle spaces before the first line
                 if (i === 0) {
                     if (!stmt.body[0].leadingComments) {
-                        generateBlankLines(stmt.range[0], stmt.body[i].range[0], result);
+                        /** @type {[number, number]} */
+                        // @ts-expect-error Extended estree
+                        // eslint-disable-next-line prefer-destructuring -- TS
+                        const range = stmt.range;
+
+                        /** @type {[number, number]} */
+                        // @ts-expect-error Extended estree
+                        const bodyRange = stmt.body[i].range;
+                        generateBlankLines(range[0], bodyRange[0], result);
                     }
                 }
 
                 // handle spaces between lines
                 if (i > 0) {
                     if (!stmt.body[i - 1].trailingComments && !stmt.body[i].leadingComments) {
-                        generateBlankLines(stmt.body[i - 1].range[1], stmt.body[i].range[0], result);
+                        /** @type {[number, number]} */
+                        // @ts-expect-error Extended estree
+                        const bodyItemRangePrev = stmt.body[i - 1].range;
+
+                        /** @type {[number, number]} */
+                        // @ts-expect-error Extended estree
+                        const bodyItemRange = stmt.body[i].range;
+                        generateBlankLines(bodyItemRangePrev[1], bodyItemRange[0], result);
                     }
                 }
             }
@@ -1754,7 +1987,15 @@ CodeGenerator.Statement = {
                 // handle spaces after the last line
                 if (i === iz - 1) {
                     if (!stmt.body[i].trailingComments) {
-                        generateBlankLines(stmt.body[i].range[1], stmt.range[1], result);
+                        /** @type {[number, number]} */
+                        // @ts-expect-error Extended estree
+                        // eslint-disable-next-line prefer-destructuring -- TS
+                        const range = stmt.range;
+
+                        /** @type {[number, number]} */
+                        // @ts-expect-error Extended estree
+                        const bodyRange = stmt.body[i].range;
+                        generateBlankLines(bodyRange[1], range[1], result);
                     }
                 }
             }
@@ -1762,6 +2003,11 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').FunctionDeclaration} stmt
+     * @param {number} flags
+     */
     FunctionDeclaration (stmt, flags) {
         return [
             generateAsyncPrefix(stmt, true),
@@ -1772,6 +2018,11 @@ CodeGenerator.Statement = {
         ];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ReturnStatement} stmt
+     * @param {number} flags
+     */
     ReturnStatement (stmt, flags) {
         if (stmt.argument) {
             return [join(
@@ -1782,9 +2033,14 @@ CodeGenerator.Statement = {
         return [`return${this.semicolon(flags)}`];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').WhileStatement} stmt
+     * @param {number} flags
+     */
     WhileStatement (stmt, flags) {
         const that = this;
-        let result;
+        let result = [];
         withIndent(function () {
             result = [
                 `while${space}(`,
@@ -1796,9 +2052,14 @@ CodeGenerator.Statement = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').WithStatement} stmt
+     * @param {number} flags
+     */
     WithStatement (stmt, flags) {
         const that = this;
-        let result;
+        let result = [];
         withIndent(function () {
             result = [
                 `with${space}(`,
@@ -1811,12 +2072,14 @@ CodeGenerator.Statement = {
     }
 };
 
-merge(CodeGenerator.prototype, CodeGenerator.Statement);
+const Expression = {
 
-// Expressions.
-
-CodeGenerator.Expression = {
-
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').SequenceExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     SequenceExpression (expr, precedence, flags) {
         if (Precedence.Sequence < precedence) {
             flags |= F_ALLOW_IN;
@@ -1831,14 +2094,32 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.Sequence, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').AssignmentExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     AssignmentExpression (expr, precedence, flags) {
         return this.generateAssignment(expr.left, expr.right, expr.operator, precedence, flags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ArrowFunctionExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ArrowFunctionExpression (expr, precedence, flags) {
         return parenthesize(this.generateFunctionBody(expr), Precedence.ArrowFunction, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ConditionalExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ConditionalExpression (expr, precedence, flags) {
         if (Precedence.Conditional < precedence) {
             flags |= F_ALLOW_IN;
@@ -1856,13 +2137,26 @@ CodeGenerator.Expression = {
         );
     },
 
+    /**
+     * @param {import('estree').LogicalExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     LogicalExpression (expr, precedence, flags) {
         if (expr.operator === '??') {
             flags |= F_FOUND_COALESCE;
         }
+
+        // @ts-expect-error See comments under `Object.assign` of prototypes below
         return this.BinaryExpression(expr, precedence, flags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').BinaryExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     BinaryExpression (expr, precedence, flags) {
         const currentPrecedence = BinaryPrecedence[expr.operator];
         const leftPrecedence = expr.operator === '**' ? Precedence.Postfix : currentPrecedence;
@@ -1897,12 +2191,21 @@ CodeGenerator.Expression = {
         if (expr.operator === 'in' && !(flags & F_ALLOW_IN)) {
             return ['(', result, ')'];
         }
+        // @ts-expect-error Older implementation?
         if ((expr.operator === '||' || expr.operator === '&&') && (flags & F_FOUND_COALESCE)) {
             return ['(', result, ')'];
         }
         return parenthesize(result, currentPrecedence, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').CallExpression & {
+     *   optional?: boolean
+     * }} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     CallExpression (expr, precedence, flags) {
         // F_ALLOW_UNPARATH_NEW becomes false.
         const result = [this.generateExpression(expr.callee, Precedence.Call, E_TTF)];
@@ -1927,6 +2230,12 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.Call, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ChainExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ChainExpression (expr, precedence, flags) {
         if (Precedence.OptionalChaining < precedence) {
             flags |= F_ALLOW_CALL;
@@ -1937,6 +2246,12 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.OptionalChaining, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').NewExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     NewExpression (expr, precedence, flags) {
         const { length } = expr['arguments'];
 
@@ -1963,6 +2278,12 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.New, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').MemberExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     MemberExpression (expr, precedence, flags) {
         // F_ALLOW_UNPARATH_NEW becomes false.
         const result = [this.generateExpression(expr.object, Precedence.Call, (flags & F_ALLOW_CALL) ? E_TTF : E_TFF)];
@@ -1976,7 +2297,9 @@ CodeGenerator.Expression = {
             result.push(this.generateExpression(expr.property, Precedence.Sequence, flags & F_ALLOW_CALL ? E_TTT : E_TFT));
             result.push(']');
         } else {
-            if (!expr.optional && expr.object.type === Syntax.Literal && typeof expr.object.value === 'number') {
+            if (!expr.optional && expr.object.type === Syntax.Literal &&
+                typeof /** @type {import('estree').Literal} */ (expr.object).value === 'number'
+            ) {
                 const fragment = toSourceNodeWhenNeeded(result).toString();
                 // When the following conditions are all true,
                 //   1. No floating point
@@ -1994,12 +2317,20 @@ CodeGenerator.Expression = {
                 }
             }
             result.push(expr.optional ? '?.' : '.');
-            result.push(generateIdentifier(expr.property));
+            result.push(generateIdentifier(
+                /** @type {import('estree').PrivateIdentifier} */
+                (expr.property)
+            ));
         }
 
         return parenthesize(result, Precedence.Member, precedence);
     },
 
+    /**
+     * @param {import('estree').MetaProperty} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     MetaProperty (expr, precedence, flags) {
         const result = [];
         result.push(typeof expr.meta === 'string' ? expr.meta : generateIdentifier(expr.meta));
@@ -2008,9 +2339,16 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.Member, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').UnaryExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     UnaryExpression (expr, precedence, flags) {
         const fragment = this.generateExpression(expr.argument, Precedence.Unary, E_TTT);
 
+        /** @type {NestedStringArray} */
         let result;
         if (space === '') {
             result = join(expr.operator, fragment);
@@ -2039,7 +2377,14 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.Unary, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').YieldExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     YieldExpression (expr, precedence, flags) {
+        /** @type {StringOrSourceNodeOrArray} */
         let result;
         if (expr.delegate) {
             result = 'yield*';
@@ -2055,6 +2400,14 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.Yield, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').AwaitExpression & {
+     *   all?: boolean
+     * }} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     AwaitExpression (expr, precedence, flags) {
         const result = join(
             expr.all ? 'await*' : 'await',
@@ -2063,6 +2416,12 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.Await, precedence);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').UpdateExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     UpdateExpression (expr, precedence, flags) {
         if (expr.prefix) {
             return parenthesize(
@@ -2084,7 +2443,14 @@ CodeGenerator.Expression = {
         );
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').FunctionExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     FunctionExpression (expr, precedence, flags) {
+        /** @type {NestedStringArray} */
         const result = [
             generateAsyncPrefix(expr, true),
             'function'
@@ -2099,15 +2465,31 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ArrayPattern} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ArrayPattern (expr, precedence, flags) {
-        return this.ArrayExpression(expr, precedence, flags, true);
+        return /** @type {CodeGenerator & CodeGenerator.Expression} */ (
+            this
+        ).ArrayExpression(expr, precedence, flags, true);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ArrayExpression|import('estree').ArrayPattern} expr
+     * @param {number} precedence
+     * @param {number} flags
+     * @param {boolean} [isPattern]
+     */
     ArrayExpression (expr, precedence, flags, isPattern) {
         if (!expr.elements.length) {
             return '[]';
         }
         const multiline = isPattern ? false : expr.elements.length > 1;
+        /** @type {StringOrSourceNodeOrArray} */
         const result = ['[', multiline ? newline : ''];
         const that = this;
         withIndent(function (indent) {
@@ -2121,7 +2503,12 @@ CodeGenerator.Expression = {
                     }
                 } else {
                     result.push(multiline ? indent : '');
-                    result.push(that.generateExpression(expr.elements[i], Precedence.Assignment, E_TTT));
+                    result.push(that.generateExpression(
+                        /** @type {import('estree').Node} */
+                        (expr.elements[i]),
+                        Precedence.Assignment,
+                        E_TTT
+                    ));
                 }
                 if (i + 1 < iz) {
                     result.push(`,${multiline ? newline : space}`);
@@ -2136,11 +2523,24 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').RestElement} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     RestElement(expr, precedence, flags) {
         return `...${this.generatePattern(expr.argument)}`;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ClassExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ClassExpression (expr, precedence, flags) {
+        /** @type {NestedStringArray} */
         let result = ['class'];
         if (expr.id) {
             result = join(result, this.generateExpression(expr.id, Precedence.Sequence, E_TTT));
@@ -2154,12 +2554,17 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').MethodDefinition} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     MethodDefinition (expr, precedence, flags) {
-        let result;
+        /** @type {string[]} */
+        let result = [];
         if (expr['static']) {
             result = [`static${space}`];
-        } else {
-            result = [];
         }
 
         let fragment;
@@ -2178,17 +2583,27 @@ CodeGenerator.Expression = {
         return join(result, fragment);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').Property} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     Property (expr, precedence, flags) {
         if (expr.kind === 'get' || expr.kind === 'set') {
             return [
                 expr.kind, noEmptySpace(),
                 this.generatePropertyKey(expr.key, expr.computed),
-                this.generateFunctionBody(expr.value)
+                this.generateFunctionBody(
+                    /** @type {import('estree').FunctionExpression} */
+                    (expr.value)
+                )
             ];
         }
 
         if (expr.shorthand) {
             if (expr.value.type === 'AssignmentPattern') {
+                // @ts-expect-error See comments under `Object.assign` of prototypes below
                 return this.AssignmentPattern(expr.value, Precedence.Sequence, E_TTT);
             }
             return this.generatePropertyKey(expr.key, expr.computed);
@@ -2198,7 +2613,10 @@ CodeGenerator.Expression = {
             return [
                 generateMethodPrefix(expr),
                 this.generatePropertyKey(expr.key, expr.computed),
-                this.generateFunctionBody(expr.value)
+                this.generateFunctionBody(
+                    /** @type {import('estree').FunctionExpression} */
+                    (expr.value)
+                )
             ];
         }
 
@@ -2209,6 +2627,12 @@ CodeGenerator.Expression = {
         ];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ObjectExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ObjectExpression (expr, precedence, flags) {
         if (!expr.properties.length) {
             return '{}';
@@ -2216,7 +2640,9 @@ CodeGenerator.Expression = {
         const multiline = expr.properties.length > 1;
 
         const that = this;
-        let fragment;
+
+        /** @type {string | import('source-map').SourceNode} */
+        let fragment = '';
         withIndent(function () {
             fragment = that.generateExpression(expr.properties[0], Precedence.Sequence, E_TTT);
         });
@@ -2235,7 +2661,8 @@ CodeGenerator.Expression = {
             }
         }
 
-        let result;
+        /** @type {(string | import('source-map').SourceNode)[]} */
+        let result = [];
         withIndent(function (indent) {
             result = [ '{', newline, indent, fragment ];
 
@@ -2259,10 +2686,22 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').AssignmentPattern} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     AssignmentPattern(expr, precedence, flags) {
         return this.generateAssignment(expr.left, expr.right, '=', precedence, flags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ObjectPattern} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ObjectPattern (expr, precedence, flags) {
         if (!expr.properties.length) {
             return '{}';
@@ -2273,7 +2712,9 @@ CodeGenerator.Expression = {
             const [property] = expr.properties;
             if (
                 property.type === Syntax.Property
-                    && property.value.type !== Syntax.Identifier
+                    && /** @type {import('estree').AssignmentProperty} */ (
+                        property
+                    ).value.type !== Syntax.Identifier
             ) {
                 multiline = true;
             }
@@ -2281,13 +2722,17 @@ CodeGenerator.Expression = {
             for (const property of expr.properties) {
                 if (
                     property.type === Syntax.Property
-                        && !property.shorthand
+                        && !(/** @type {import('estree').AssignmentProperty} */ (
+                            property
+                        )).shorthand
                 ) {
                     multiline = true;
                     break;
                 }
             }
         }
+
+        /** @type {StringOrSourceNodeOrArray} */
         const result = ['{', multiline ? newline : '' ];
 
         const that = this;
@@ -2309,33 +2754,72 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @param {import('estree').ThisExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ThisExpression (expr, precedence, flags) {
         return 'this';
     },
 
+    /**
+     * @param {import('estree').Super} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     Super (expr, precedence, flags) {
         return 'super';
     },
 
+    /**
+     * @param {import('estree').Identifier} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     Identifier (expr, precedence, flags) {
         return generateIdentifier(expr);
     },
 
+    /**
+     * @param {import('estree').ImportDefaultSpecifier} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ImportDefaultSpecifier (expr, precedence, flags) {
-        return generateIdentifier(expr.id || expr.local);
+        return generateIdentifier(
+            /* c8 ignore next 2 -- Guard */
+            ('id' in expr && /** @type {{id: import('estree').Identifier}} */ (
+                expr
+            ).id) || expr.local
+        );
     },
 
+    /**
+     * @param {import('estree').ImportNamespaceSpecifier} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ImportNamespaceSpecifier (expr, precedence, flags) {
         const result = ['*'];
-        const id = expr.id || expr.local;
+        const id = /** @type {import('estree').Identifier} */ (
+            /* c8 ignore next -- Guard */
+            'id' in expr && expr.id
+        ) || expr.local;
         if (id) {
             result.push(`${space}as${noEmptySpace()}${generateIdentifier(id)}`);
         }
         return result;
     },
 
+    /**
+     * @param {import('estree').ImportSpecifier} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ImportSpecifier (expr, precedence, flags) {
-        const { imported } = expr;
+        // eslint-disable-next-line prefer-destructuring -- TS
+        const imported = /** @type {import('estree').Identifier} */ (expr.imported);
         const result = [ imported.name ];
         const { local } = expr;
         if (local && local.name !== imported.name) {
@@ -2344,21 +2828,41 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @param {import('estree').ExportSpecifier} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ExportSpecifier (expr, precedence, flags) {
-        const { local } = expr;
+        // eslint-disable-next-line prefer-destructuring -- TS
+        const local = /** @type {import('estree').Identifier} */ (expr.local);
         const result = [ local.name ];
-        const { exported } = expr;
+        // eslint-disable-next-line prefer-destructuring -- TS
+        const exported = /** @type {import('estree').Identifier} */ (expr.exported);
         if (exported && exported.name !== local.name) {
             result.push(`${noEmptySpace()}as${noEmptySpace()}${generateIdentifier(exported)}`);
         }
         return result;
     },
 
+    /**
+     * @param {import('estree').Literal & {
+     *   bigint?: string,
+     *   regex?: {
+     *     pattern: string,
+     *     flags: string
+     *   }
+     * }} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     Literal (expr, precedence, flags) {
         let raw;
-        if (Object.prototype.hasOwnProperty.call(expr, 'raw') && parse && extra.raw) {
+        if (Object.hasOwn(expr, 'raw') && parse && extra.raw) {
             try {
-                raw = parse(expr.raw).body[0].expression;
+                raw = /** @type {import('estree').Directive} */ (
+                    parse(/** @type {string} */ (expr.raw)).body[0]
+                ).expression;
                 if (raw.type === Syntax.Literal) {
                     if (raw.value === expr.value) {
                         return expr.raw;
@@ -2400,17 +2904,34 @@ CodeGenerator.Expression = {
             return expr.value ? 'true' : 'false';
         }
 
-        return generateRegExp(expr.value);
+        return generateRegExp(/** @type {RegExp} */ (expr.value));
     },
 
+    /**
+     * @param {import('estree').Node} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     GeneratorExpression (expr, precedence, flags) {
+        // @ts-expect-error See comments under `Object.assign` of prototypes below
         return this.ComprehensionExpression(expr, precedence, flags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').Node & {
+     *   body: import('estree').Expression
+     *   blocks: import('estree').Expression[]
+     *   filter?: import('estree').Expression
+     * }} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ComprehensionExpression (expr, precedence, flags) {
         // GeneratorExpression should be parenthesized with (...), ComprehensionExpression with [...]
         // Due to https://bugzilla.mozilla.org/show_bug.cgi?id=883468 position of expr.body can differ in Spidermonkey and ES6
 
+        /** @type {NestedStringArray} */
         let result = (expr.type === Syntax.GeneratorExpression) ? ['('] : ['['];
 
         if (extra.moz.comprehensionExpressionStartsWithAssignment) {
@@ -2448,12 +2969,27 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').Node & {
+     *   left: import('estree').VariableDeclaration|import('estree').Expression,
+     *   of: boolean,
+     *   right: import('estree').Expression
+     * }} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ComprehensionBlock (expr, precedence, flags) {
         let fragment;
         if (expr.left.type === Syntax.VariableDeclaration) {
             fragment = [
-                expr.left.kind, noEmptySpace(),
-                this.generateStatement(expr.left.declarations[0], S_FFFF)
+                /** @type {import('estree').VariableDeclaration} */
+                (expr.left).kind, noEmptySpace(),
+                this.generateStatement(
+                    /** @type {import('estree').VariableDeclaration} */
+                    (expr.left).declarations[0],
+                    S_FFFF
+                )
             ];
         } else {
             fragment = this.generateExpression(expr.left, Precedence.Call, E_TTT);
@@ -2465,6 +3001,12 @@ CodeGenerator.Expression = {
         return [ `for${space}(`, fragment, ')' ];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').SpreadElement} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     SpreadElement (expr, precedence, flags) {
         return [
             '...',
@@ -2472,6 +3014,12 @@ CodeGenerator.Expression = {
         ];
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').TaggedTemplateExpression} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     TaggedTemplateExpression (expr, precedence, flags) {
         let itemFlags = E_TTF;
         if (!(flags & F_ALLOW_CALL)) {
@@ -2484,16 +3032,33 @@ CodeGenerator.Expression = {
         return parenthesize(result, Precedence.TaggedTemplate, precedence);
     },
 
+    /**
+     * @param {import('estree').TemplateElement} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     TemplateElement (expr, precedence, flags) {
         // Don't use "cooked". Since tagged template can use raw template
         // representation. So if we do so, it breaks the script semantics.
         return expr.value.raw;
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').TemplateLiteral} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     TemplateLiteral (expr, precedence, flags) {
+        /** @type {(string | import('source-map').SourceNode)[]} */
         const result = [ '`' ];
         for (let i = 0, iz = expr.quasis.length; i < iz; ++i) {
-            result.push(this.generateExpression(expr.quasis[i], Precedence.Primary, E_TTT));
+            result.push(this.generateExpression(
+                /** @type {import('estree').Expression} */
+                (/** @type {unknown} */ (expr.quasis[i])),
+                Precedence.Primary,
+                E_TTT
+            ));
             if (i + 1 < iz) {
                 result.push(`\${${space}`);
                 result.push(this.generateExpression(expr.expressions[i], Precedence.Sequence, E_TTT));
@@ -2504,10 +3069,21 @@ CodeGenerator.Expression = {
         return result;
     },
 
+    /**
+     * @param {import('estree').Literal} expr
+     * @param {number} precedence
+     * @param {number} flags
+     */
     ModuleSpecifier (expr, precedence, flags) {
         return this.Literal(expr, precedence, flags);
     },
 
+    /**
+     * @this {CodeGenerator}
+     * @param {import('estree').ImportExpression} expr
+     * @param {number} precedence
+     * @param {number} flag
+     */
     ImportExpression(expr, precedence, flag) {
         return parenthesize([
             'import(',
@@ -2517,8 +3093,349 @@ CodeGenerator.Expression = {
     }
 };
 
-merge(CodeGenerator.prototype, CodeGenerator.Expression);
+class CodeGenerator {
 
+    // Helpers.
+
+    /**
+     * @param {import('estree').Statement} stmt
+     * @param {number} flags
+     */
+    maybeBlock (stmt, flags) {
+        const noLeadingComment = !extra.comment || !stmt.leadingComments;
+
+        if (stmt.type === Syntax.BlockStatement && noLeadingComment) {
+            return [space, this.generateStatement(stmt, flags)];
+        }
+
+        if (stmt.type === Syntax.EmptyStatement && noLeadingComment) {
+            return ';';
+        }
+
+        const that = this;
+
+        /** @type {NestedStringArray} */
+        let result = [];
+        withIndent(function () {
+            result = [
+                newline,
+                addIndent(that.generateStatement(stmt, flags))
+            ];
+        });
+
+        return result;
+    }
+
+    /**
+     * @param {import('estree').Statement} stmt
+     * @param {StringOrSourceNodeOrArray} result
+     */
+    maybeBlockSuffix (stmt, result) {
+        const ends = endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString());
+        if (stmt.type === Syntax.BlockStatement && (!extra.comment || !stmt.leadingComments) && !ends) {
+            return [result, space];
+        }
+        if (ends) {
+            return [result, base];
+        }
+        return [result, newline, base];
+    }
+
+    /**
+     * @param {import('estree').Node} node
+     * @param {number} [precedence]
+     * @param {number} [flags]
+     */
+    generatePattern (node, precedence, flags) {
+        if (node.type === Syntax.Identifier) {
+            return generateIdentifier(/** @type {import('estree').Identifier} */ (node));
+        }
+        return this.generateExpression(/** @type {import('estree').Expression} */ (node), precedence, flags);
+    }
+
+    /**
+     * @param {(import('estree').ArrowFunctionExpression|import('estree').FunctionExpression|
+     *   import('estree').FunctionDeclaration) & {
+     *   rest?: import('estree').Identifier,
+     *   defaults?: import('estree').Node[]
+     * }} node
+     */
+    generateFunctionParams (node) {
+        /** @type {NestedStringArray} */
+        let result;
+        if (node.type === Syntax.ArrowFunctionExpression &&
+                    !node.rest && (!node.defaults || node.defaults.length === 0) &&
+                    node.params.length === 1 && node.params[0].type === Syntax.Identifier) {
+            // arg => { } case
+            result = [
+                generateAsyncPrefix(node, true),
+                generateIdentifier(/** @type {import('estree').Identifier} */ (
+                    node.params[0]
+                ))
+            ];
+        } else {
+            result = node.type === Syntax.ArrowFunctionExpression
+                ? [generateAsyncPrefix(node, false)]
+                : [];
+            result.push('(');
+
+            let hasDefault = false;
+            if (node.defaults) {
+                hasDefault = true;
+            }
+            for (let i = 0, iz = node.params.length; i < iz; ++i) {
+                if (hasDefault && node.defaults && node.defaults[i]) {
+                    // Handle default values.
+                    result.push(this.generateAssignment(node.params[i], node.defaults[i], '=', Precedence.Assignment, E_TTT));
+                } else {
+                    result.push(this.generatePattern(node.params[i], Precedence.Assignment, E_TTT));
+                }
+                if (i + 1 < iz) {
+                    result.push(`,${space}`);
+                }
+            }
+
+            if (node.rest) {
+                if (node.params.length) {
+                    result.push(`,${space}`);
+                }
+                result.push('...');
+                result.push(generateIdentifier(node.rest));
+            }
+
+            result.push(')');
+        }
+
+        return result;
+    }
+
+    /**
+     * @param {import('estree').ArrowFunctionExpression|
+     *   import('estree').FunctionExpression|
+     *   import('estree').FunctionDeclaration} node
+     */
+    generateFunctionBody (node) {
+        const result = this.generateFunctionParams(node);
+
+        if (node.type === Syntax.ArrowFunctionExpression) {
+            result.push(space);
+            result.push('=>');
+        }
+
+        if ('expression' in node && node.expression) {
+            result.push(space);
+            /** @type {string | import('source-map').SourceNode | NestedStringArray} */
+            let expr = this.generateExpression(
+                /** @type {import('estree').Expression} */
+                (node.body),
+                Precedence.Assignment,
+                E_TTT
+            );
+            if (expr.toString().charAt(0) === '{') {
+                expr = ['(', expr, ')'];
+            }
+            result.push(expr);
+        } else {
+            result.push(this.maybeBlock(
+                /** @type {import('estree').BlockStatement} */
+                (node.body),
+                S_TTFF
+            ));
+        }
+
+        return result;
+    }
+
+    /**
+     * @param {"in"|"of"} operator
+     * @param {import('estree').ForInStatement|import('estree').ForOfStatement} stmt
+     * @param {number} flags
+     */
+    generateIterationForStatement (operator, stmt, flags) {
+        const that = this;
+
+        /** @type {NestedStringArray} */
+        let result = [`for${'await' in stmt && stmt.await ? `${noEmptySpace()}await` : ''}${space}(`];
+        withIndent(function () {
+            if (stmt.left.type === Syntax.VariableDeclaration) {
+                withIndent(function () {
+                    result.push(/** @type {import('estree').VariableDeclaration} */ (
+                        stmt.left
+                    ).kind + noEmptySpace());
+                    result.push(that.generateStatement(
+                        /** @type {import('estree').VariableDeclaration} */
+                        (stmt.left).declarations[0],
+                        S_FFFF
+                    ));
+                });
+            } else {
+                result.push(that.generateExpression(
+                    /** @type {import('estree').Pattern} */
+                    (stmt.left),
+                    Precedence.Call,
+                    E_TTT
+                ));
+            }
+
+            result = join(result, operator);
+            result = [join(
+                result,
+                that.generateExpression(stmt.right, Precedence.Assignment, E_TTT)
+            ), ')'];
+        });
+        result.push(this.maybeBlock(stmt.body, flags));
+        return result;
+    }
+
+    /**
+     * @param {import('estree').Expression|import('estree').PrivateIdentifier} expr
+     * @param {boolean} computed
+     */
+    generatePropertyKey (expr, computed) {
+        const result = [];
+
+        if (computed) {
+            result.push('[');
+        }
+
+        result.push(this.generateExpression(expr, Precedence.Assignment, E_TTT));
+
+        if (computed) {
+            result.push(']');
+        }
+
+        return result;
+    }
+
+    /**
+     * @param {import('estree').Pattern} left
+     * @param {import('estree').Node} right
+     * @param {import('estree').AssignmentOperator} operator
+     * @param {number} precedence
+     * @param {number} flags
+     */
+    generateAssignment (left, right, operator, precedence, flags) {
+        if (Precedence.Assignment < precedence) {
+            flags |= F_ALLOW_IN;
+        }
+
+        return parenthesize(
+            [
+                this.generateExpression(left, Precedence.Call, flags),
+                space + operator + space,
+                this.generateExpression(right, Precedence.Assignment, flags)
+            ],
+            Precedence.Assignment,
+            precedence
+        );
+    }
+
+    /**
+     * @param {number} flags
+     */
+    semicolon (flags) {
+        if (!semicolons && flags & F_SEMICOLON_OPT) {
+            return '';
+        }
+        return ';';
+    }
+
+    /**
+     * @param {import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration} expr
+     * @param {number|undefined} precedence
+     * @param {number|undefined} flags
+     * @returns {string | import('source-map').SourceNode}
+     */
+    generateExpression (expr, precedence, flags) {
+        const type = expr.type || Syntax.Property;
+
+        if (extra.verbatim && Object.hasOwn(expr, extra.verbatim)) {
+            return generateVerbatim(expr, precedence);
+        }
+
+        // @ts-expect-error See comments under `Object.assign` of prototypes below
+        let result = this[type](expr, precedence, flags);
+        let typeCast;
+        if ('jsdoc' in expr && expr.jsdoc) {
+            // eslint-disable-next-line prefer-destructuring -- TS
+            const jsdoc = /** @type {import('@es-joy/jsdoccomment').JsdocBlock} */ (expr.jsdoc);
+            typeCast = expr.type !== 'Property' && !jsdoc.endLine &&
+                jsdoc.tags.some((tag) => {
+                    return tag.tag === 'type';
+                });
+            if (typeCast) {
+                result = ['(', result];
+            }
+            result = addJsdoc(/** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)} */ (
+                this.JsdocBlock
+            )(jsdoc), result);
+        }
+        if (extra.comment) {
+            result = addComments(expr, result);
+        }
+
+        if (typeCast) {
+            result.push(')');
+        }
+        result = toSourceNodeWhenNeeded(result, expr);
+        return result;
+    }
+
+    /**
+     * @param {(import('estree').Node|import('estree').MaybeNamedClassDeclaration|import('estree').MaybeNamedFunctionDeclaration) & {
+     *   jsdoc?: import('@es-joy/jsdoccomment').JsdocBlock
+     * }} stmt
+     * @param {number} flags
+     */
+    generateStatement (stmt, flags) {
+        // @ts-expect-error See comments under `Object.assign` of prototypes below
+        let result = this[stmt.type](stmt, flags);
+        if (stmt.jsdoc && this.JsdocBlock) {
+            result = addJsdoc(this.JsdocBlock(stmt.jsdoc), result);
+        }
+
+        // Attach comments
+
+        if (extra.comment) {
+            result = addComments(stmt, result);
+        }
+
+        const fragment = toSourceNodeWhenNeeded(result).toString();
+        if (stmt.type === Syntax.Program && !safeConcatenation && newline === '' &&  fragment.charAt(fragment.length - 1) === '\n') {
+            result = sourceMap
+                ? /** @type {import('source-map').SourceNode} */ (
+                    toSourceNodeWhenNeeded(result)
+                ).replaceRight(/\s+$/.source, '')
+                : fragment.replace(/\s+$/, '');
+        }
+
+        return toSourceNodeWhenNeeded(result, stmt);
+    }
+}
+
+/** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)|null} */
+CodeGenerator.prototype.JsdocBlock = null;
+
+// Statements.
+
+CodeGenerator.Statement = Statement;
+
+// TypeScript unfortunately does not recognize this, so our `this` values are off;
+//   setting them dynamically or even manually doesn't work
+Object.assign(CodeGenerator.prototype, CodeGenerator.Statement);
+
+// Expressions.
+
+CodeGenerator.Expression = Expression;
+
+// TypeScript unfortunately does not recognize this, so our `this` values are off;
+//   setting them dynamically or even manually doesn't work
+Object.assign(CodeGenerator.prototype, CodeGenerator.Expression);
+
+/**
+ * @param {import('estree').Node} node
+ * @param {typeof codegenFactory} codegenFactory
+ */
 function generateInternal(node, codegenFactory) {
     const codegen = codegenFactory();
     if (isStatement(node)) {
@@ -2532,6 +3449,52 @@ function generateInternal(node, codegenFactory) {
     throw new Error(`Unknown node type: ${node.type}`);
 }
 
+/**
+ * @typedef {{
+ *  file?: string,
+ *  sourceContent?: string,
+ *  indent: null,
+ *  base: null,
+ *  parse: null,
+ *  comment: boolean,
+ *  codegenFactory: () => CodeGenerator,
+ *  format: {
+ *    indent: {
+ *      style: string,
+ *      base: number,
+ *      adjustMultilineComment: boolean
+ *    },
+ *    newline: string,
+ *    space: string,
+ *    json: boolean,
+ *    renumber: boolean,
+ *    hexadecimal: boolean,
+ *    quotes: 'single'|'double'|'auto',
+ *    escapeless: boolean,
+ *    compact: boolean,
+ *    parentheses: boolean,
+ *    semicolons: boolean,
+ *    safeConcatenation: boolean,
+ *    preserveBlankLines: boolean
+ *  },
+ *  moz: {
+ *    comprehensionExpressionStartsWithAssignment: boolean,
+ *    starlessGenerator: boolean
+ *  },
+ *  sourceMap: null,
+ *  sourceMapRoot: null,
+ *  sourceMapWithCode: boolean,
+ *  directive: boolean,
+ *  raw: boolean,
+ *  verbatim: null,
+ *  sourceCode: null
+ * }} GenerateOptions
+ */
+
+/**
+ * @param {import('estree').Node} node
+ * @param {GenerateOptions} options
+ */
 function generate(node, options) {
     const defaultOptions = getDefaultOptions();
 
@@ -2574,7 +3537,7 @@ function generate(node, options) {
     preserveBlankLines = options.format.preserveBlankLines && sourceCode !== null;
     extra = options;
 
-    if (sourceMap) {
+    if (sourceMap && generate.sourceMapModule) {
         ({ SourceNode } = generate.sourceMapModule);
     }
 
@@ -2603,6 +3566,9 @@ function generate(node, options) {
 
     return pair.map.toString();
 }
+
+/** @type {import('source-map')|null} */
+generate.sourceMapModule = null;
 
 const FORMAT_MINIFY = {
     indent: {
