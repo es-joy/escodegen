@@ -1,6 +1,6 @@
 {
     "name": "@es-joy/escodegen",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "description": "ECMAScript code generator",
     "homepage": "http://github.com/es-joy/escodegen",
     "bugs": "http://github.com/es-joy/escodegen/issues",
@@ -59,6 +59,7 @@
         "source-map": "~0.7.6"
     },
     "devDependencies": {
+        "@es-joy/jsdoccomment": "^0.62.0",
         "@eslint/js": "^9.36.0",
         "@rollup/plugin-commonjs": "^28.0.6",
         "@rollup/plugin-node-resolve": "^16.0.1",

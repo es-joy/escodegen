@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 4.0.2
+
+- fix: add `@es-joy/jsdoccomment` for types to devDeps.
+
 ## 4.0.1
 
 - fix: provide `default` in `package.json` `exports`
