@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 4.0.1
+
+- fix: provide `default` in `package.json` `exports`
+
 ## 4.0.0
 
 - feat: add TS support

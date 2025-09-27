@@ -1,11 +1,12 @@
 {
     "name": "@es-joy/escodegen",
-    "version": "4.0.0",
+    "version": "4.0.1",
     "description": "ECMAScript code generator",
     "homepage": "http://github.com/es-joy/escodegen",
     "bugs": "http://github.com/es-joy/escodegen/issues",
     "type": "module",
     "main": "./dist/escodegen.cjs",
+    "types": "./dist/escodegen-node.d.ts",
     "exports": {
         "node": {
             "types": "./dist/escodegen-node.d.ts",
@@ -13,7 +14,12 @@
             "require": "./dist/escodegen.cjs"
         },
         "browser-import": "./dist/escodegen-browser.esm.min.js",
-        "browser": "./dist/escodegen-browser.umd.min.js"
+        "browser": "./dist/escodegen-browser.umd.min.js",
+        "default": {
+            "types": "./dist/escodegen-node.d.ts",
+            "import": "./dist/escodegen-node.esm.min.js",
+            "require": "./dist/escodegen.cjs"
+        }
     },
     "bin": {
         "esgenerate": "./bin/esgenerate.js",
