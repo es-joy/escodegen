@@ -1,6 +1,6 @@
 {
     "name": "@es-joy/escodegen",
-    "version": "4.0.3",
+    "version": "4.1.0",
     "description": "ECMAScript code generator",
     "homepage": "http://github.com/es-joy/escodegen",
     "bugs": "http://github.com/es-joy/escodegen/issues",
@@ -34,7 +34,8 @@
         "README.md",
         "bin",
         "dist",
-        "package.json"
+        "package.json",
+        "!dist/*.map"
     ],
     "engines": {
         "node": ">=6.0"

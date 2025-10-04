@@ -1,5 +1,9 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 4.1.0
+
+- perf: reduce package size by avoiding map files in dist
+
 ## 4.0.3
 
 - fix: add `@es-joy/jsdoccomment` for types to deps.
