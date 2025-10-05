@@ -3040,7 +3040,7 @@ const Expression = {
     TemplateElement (expr, precedence, flags) {
         // Don't use "cooked". Since tagged template can use raw template
         // representation. So if we do so, it breaks the script semantics.
-        return expr.value.raw;
+        return json ? JSON.stringify(expr.value.raw).slice(1, -1) : expr.value.raw;
     },
 
     /**
@@ -3050,8 +3050,10 @@ const Expression = {
      * @param {number} flags
      */
     TemplateLiteral (expr, precedence, flags) {
+        const safeConvertToJson = json && expr.quasis.length === 1;
+
         /** @type {(string | import('source-map').SourceNode)[]} */
-        const result = [ '`' ];
+        const result = [ safeConvertToJson ? '"' : '`' ];
         for (let i = 0, iz = expr.quasis.length; i < iz; ++i) {
             result.push(this.generateExpression(
                 /** @type {import('estree').Expression} */
@@ -3065,7 +3067,7 @@ const Expression = {
                 result.push(`${space}}`);
             }
         }
-        result.push('`');
+        result.push(safeConvertToJson ? '"' : '`');
         return result;
     },
 
@@ -3298,7 +3300,15 @@ class CodeGenerator {
             result.push('[');
         }
 
-        result.push(this.generateExpression(expr, Precedence.Assignment, E_TTT));
+        const expression = this.generateExpression(expr, Precedence.Assignment, E_TTT);
+
+        if (json && typeof expression === 'string' && expression[0] !== '"') {
+            result.push('"');
+            result.push(expression);
+            result.push('"');
+        } else {
+            result.push(expression);
+        }
 
         if (computed) {
             result.push(']');

@@ -1,6 +1,6 @@
 {
     "name": "@es-joy/escodegen",
-    "version": "4.1.0",
+    "version": "4.2.0",
     "description": "ECMAScript code generator",
     "homepage": "http://github.com/es-joy/escodegen",
     "bugs": "http://github.com/es-joy/escodegen/issues",

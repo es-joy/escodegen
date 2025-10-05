@@ -1,5 +1,11 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 4.2.0
+
+- feat: allow `format.json` to stringify output keys as JSON and
+    force template literals to plain double-quoted strings if
+    sufficiently simple
+
 ## 4.1.0
 
 - perf: reduce package size by avoiding map files in dist

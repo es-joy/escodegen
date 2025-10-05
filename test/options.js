@@ -24,6 +24,7 @@
 */
 
 import esprima from './3rdparty/esprima-1.0.0-dev.js';
+import esprimaModern from 'esprima';
 import escodegen from './loader.js';
 
 const data = [{
@@ -536,6 +537,27 @@ const data = [{
     }
 }, {
     options: {
+        format: {
+            json: true
+        },
+        parse: null
+    },
+    items: {
+        'var o = {a: \'7\'}': 'var o = { "a": "7" };',
+    }
+}, {
+    options: {
+        esprimaModern: true,
+        format: {
+            json: true
+        },
+        parse: null
+    },
+    items: {
+        'var a = `abcd`': 'var a = "abcd";',
+    }
+}, {
+    options: {
         base: 1,
         indent: '  ',
         format: {
@@ -986,9 +1008,12 @@ function runTest(options, source, expectedCode) {
         optionsParser.loc = true;
         optionsParser.tokens = true;
     }
-    let tree = esprima.parse(source);
+
+    const esprimaVersion = options.esprimaModern ? esprimaModern : esprima;
+
+    let tree = esprimaVersion.parse(source);
     const expectedTree = JSON.stringify(tree, adjustRegexLiteral, 4);
-    tree = esprima.parse(source, optionsParser);
+    tree = esprimaVersion.parse(source, optionsParser);
     if (options.comment) {
         tree = escodegen.attachComments(tree, tree.comments, tree.tokens);
     }
@@ -1000,9 +1025,13 @@ function runTest(options, source, expectedCode) {
         );
         return;
     }
-    tree = esprima.parse(actualCode);
-    const actualTree = JSON.stringify(tree, adjustRegexLiteral, 4);
-    expect(actualTree).to.be.equal(expectedTree);
+
+    // JSON can change identifier to literal (e.g., `{a: 1}` to `{"a": 1}`)
+    if (!options.format?.json) {
+        tree = esprimaVersion.parse(actualCode);
+        const actualTree = JSON.stringify(tree, adjustRegexLiteral, 4);
+        expect(actualTree).to.be.equal(expectedTree);
+    }
     expect(actualCode).to.be.equal(expectedCode);
 }
 
