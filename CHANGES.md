@@ -1,5 +1,13 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 5.0.0
+
+BREAKING CHANGES:
+- ESM only
+- Requires Node ^22.16.0 || >=24.0.0
+
+- chore: update to @es-joy/esutils; update @es-joy/jsdoccomment; bundle @types/estree
+
 ## 4.2.0
 
 - feat: allow `format.json` to stringify output keys as JSON and

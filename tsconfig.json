@@ -12,6 +12,8 @@
     "emitDeclarationOnly": true,
     "strict": true,
     "target": "es6",
+    "rootDir": "src",
+    "types": ["estree"],
     "outDir": "dist"
   },
   "include": ["src/**/*.js"],

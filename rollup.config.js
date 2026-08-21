@@ -13,16 +13,16 @@ const { version } = JSON.parse(
 
 /**
  * @external RollupConfig
- * @type {PlainObject}
+ * @type {object}
  * @see {@link https://rollupjs.org/guide/en#big-list-of-options}
  */
 
 /**
- * @param {PlainObject} [config= {}]
- * @param {boolean} [config.minifying=false]
- * @param {string} [config.format="umd"]
- * @param {boolean} [config.node=false]
- * @returns {external:RollupConfig}
+ * @param {object} [config]
+ * @param {boolean} [config.minifying]
+ * @param {string} [config.format]
+ * @param {boolean} [config.node]
+ * @returns {RollupConfig}
  */
 function getRollupObject ({ minifying, format = 'umd', browser = false } = {}) {
     const nonMinified = {
@@ -56,8 +56,6 @@ function getRollupObject ({ minifying, format = 'umd', browser = false } = {}) {
 }
 
 export default [
-    getRollupObject({ minifying: true, format: 'umd', browser: true }),
-    getRollupObject({ minifying: false, format: 'cjs' }),
     getRollupObject({ minifying: true, format: 'esm', browser: true }),
     getRollupObject({ minifying: true, format: 'esm' })
 ];

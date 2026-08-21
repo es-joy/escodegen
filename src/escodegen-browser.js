@@ -1,4 +1,3 @@
-/* eslint-env browser */
 /*
   Copyright (C) 2012 Yusuke Suzuki <utatane.tea@gmail.com>
 

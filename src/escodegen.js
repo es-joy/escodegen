@@ -35,7 +35,7 @@
 */
 
 import * as estraverse from '@es-joy/estraverse';
-import * as esutils from 'esutils';
+import * as esutils from '@es-joy/esutils';
 
 /** @type {typeof import('source-map').SourceNode} */
 let SourceNode;
@@ -975,7 +975,7 @@ function generateVerbatim(expr, precedence) {
          *   precedence: number
          * }}
          */ (
-            expr[/** @type {keyof expr} */ (extra.verbatim)]
+            expr[/** @type {keyof typeof expr} */ (extra.verbatim)]
         );
 
     /* c8 ignore next 3 -- TS */
@@ -1927,6 +1927,7 @@ const Statement = {
             (stmt.jsdocBlocks).forEach((jsdocBlock) => {
                 result.push(
                     /** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)} */ (
+                        // @ts-expect-error See comments under `Object.assign` of prototypes below
                         this.JsdocBlock
                     )(jsdocBlock)
                 );
@@ -2472,7 +2473,7 @@ const Expression = {
      * @param {number} flags
      */
     ArrayPattern (expr, precedence, flags) {
-        return /** @type {CodeGenerator & CodeGenerator.Expression} */ (
+        return /** @type {CodeGenerator & typeof CodeGenerator.Expression} */ (
             this
         ).ArrayExpression(expr, precedence, flags, true);
     },
@@ -3377,6 +3378,7 @@ class CodeGenerator {
                 result = ['(', result];
             }
             result = addJsdoc(/** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)} */ (
+                // @ts-expect-error See comments under `Object.assign` of prototypes below
                 this.JsdocBlock
             )(jsdoc), result);
         }
@@ -3400,7 +3402,9 @@ class CodeGenerator {
     generateStatement (stmt, flags) {
         // @ts-expect-error See comments under `Object.assign` of prototypes below
         let result = this[stmt.type](stmt, flags);
+        // @ts-expect-error See comments under `Object.assign` of prototypes below
         if (stmt.jsdoc && this.JsdocBlock) {
+            // @ts-expect-error See comments under `Object.assign` of prototypes below
             result = addJsdoc(this.JsdocBlock(stmt.jsdoc), result);
         }
 
@@ -3424,6 +3428,7 @@ class CodeGenerator {
 }
 
 /** @type {((stmt: import('@es-joy/jsdoccomment').JsdocBlock) => string)|null} */
+// @ts-expect-error See comments under `Object.assign` of prototypes below
 CodeGenerator.prototype.JsdocBlock = null;
 
 // Statements.
@@ -3444,7 +3449,7 @@ Object.assign(CodeGenerator.prototype, CodeGenerator.Expression);
 
 /**
  * @param {import('estree').Node} node
- * @param {typeof codegenFactory} codegenFactory
+ * @param {() => CodeGenerator} codegenFactory
  */
 function generateInternal(node, codegenFactory) {
     const codegen = codegenFactory();
@@ -3491,7 +3496,7 @@ function generateInternal(node, codegenFactory) {
  *    comprehensionExpressionStartsWithAssignment: boolean,
  *    starlessGenerator: boolean
  *  },
- *  sourceMap: null,
+ *  sourceMap: null|string,
  *  sourceMapRoot: null,
  *  sourceMapWithCode: boolean,
  *  directive: boolean,
@@ -3560,13 +3565,13 @@ function generate(node, options) {
     }
 
 
-    pair = result.toStringWithSourceMap({
+    pair = /** @type {import('source-map').SourceNode} */ (result).toStringWithSourceMap({
         file: options.file,
-        sourceRoot: options.sourceMapRoot
+        sourceRoot: options.sourceMapRoot ?? undefined
     });
 
     if (options.sourceContent) {
-        pair.map.setSourceContent(options.sourceMap,
+        pair.map.setSourceContent(/** @type {string} */ (options.sourceMap),
             options.sourceContent);
     }
 
@@ -3577,7 +3582,7 @@ function generate(node, options) {
     return pair.map.toString();
 }
 
-/** @type {import('source-map')|null} */
+/** @type {typeof import('source-map')|null} */
 generate.sourceMapModule = null;
 
 const FORMAT_MINIFY = {

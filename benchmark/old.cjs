@@ -61,7 +61,7 @@
         FORMAT_DEFAULTS;
 
     estraverse = require('@es-joy/estraverse');
-    esutils = require('esutils');
+    esutils = require('@es-joy/esutils');
 
     Syntax = {
         AssignmentExpression: 'AssignmentExpression',

@@ -53,18 +53,18 @@ const data = {
 };
 
 function test(code, result) {
-    let options = {
-        range: true,
-        tokens: true,
-        comment: true
-    };
+    // let options = {
+    //     range: true,
+    //     tokens: true,
+    //     comment: true
+    // };
 
     // This isn't actually generatable by Esprima apparently, so
     //  we only check the
     // let tree = esprima.parse(code, options);
     // tree = attachComments(tree, tree.comments, tree.tokens);
 
-    options = {
+    const options = {
         comment: true,
         sourceCode: code
     };
