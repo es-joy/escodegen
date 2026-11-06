@@ -1,8 +1,5 @@
 ## Escodegen
 [![npm version](https://badge.fury.io/js/escodegen.svg)](http://badge.fury.io/js/escodegen)
-[![Build Status](https://secure.travis-ci.org/es-joy/escodegen.svg)](http://travis-ci.org/es-joy/escodegen)
-[![Dependency Status](https://david-dm.org/es-joy/escodegen.svg)](https://david-dm.org/es-joy/escodegen)
-[![devDependency Status](https://david-dm.org/es-joy/escodegen/dev-status.svg)](https://david-dm.org/es-joy/escodegen#info=devDependencies)
 
 `@es-joy/escodegen` is a fork of [escodegen](http://github.com/estools/escodegen).
 
@@ -18,10 +15,10 @@ for a demo.
 Escodegen can be used in a web browser:
 
 ```html
-<script src="dist/escodegen-browser.umd.js"></script>
+<script type="module">
+    import './node_modules/@es-joy/escodegen/dist/escodegen-browser.esm.min.js';
+</script>
 ```
-
-`dist/escodegen-browser.umd.js` can be found in tagged revisions on GitHub.
 
 Or in a Node.js application via npm:
 
@@ -56,16 +53,8 @@ After that,
 npm run build
 ```
 
-will generate `dist/escodegen-browser.umd.js`, which can be used in
+will generate `dist/escodegen-browser.esm.min.js`, which can be used in
 browser environments.
-
-And,
-
-```sh
-npm run build-min
-```
-
-will generate the minified file `escodegen.browser.min.js`.
 
 ### License
 
