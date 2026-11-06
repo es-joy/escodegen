@@ -1,5 +1,10 @@
 # CHANGES for `@es-joy/escodegen`
 
+## 5.0.1
+
+- fix(types): create overloads for `generate`
+- docs: update README
+
 ## 5.0.0
 
 BREAKING CHANGES:

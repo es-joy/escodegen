@@ -3507,8 +3507,21 @@ function generateInternal(node, codegenFactory) {
  */
 
 /**
+ * @overload
+ * @param {import('estree').Node} node
+ * @param {Partial<GenerateOptions> & {sourceMap?: null, sourceMapWithCode?: false}} [options]
+ * @returns {string}
+ */
+/**
+ * @overload
+ * @param {import('estree').Node} node
+ * @param {Partial<GenerateOptions>} [options]
+ * @returns {string|import('source-map').CodeWithSourceMap|{code: string, map: null}}
+ */
+/**
  * @param {import('estree').Node} node
  * @param {GenerateOptions} options
+ * @returns {string|import('source-map').CodeWithSourceMap|{code: string, map: null}}
  */
 function generate(node, options) {
     const defaultOptions = getDefaultOptions();
