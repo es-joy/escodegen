@@ -52,7 +52,7 @@
     },
     "dependencies": {
         "@es-joy/estraverse": "^7.1.1",
-        "@es-joy/jsdoccomment": "^0.62.0",
+        "@es-joy/jsdoccomment": "^1.0.0",
         "esprima": "^4.0.1",
         "esutils": "^2.0.3",
         "optionator": "^0.9.4"
